@@ -1135,7 +1135,7 @@
     {
       "id": "Cap039",
       "name": "Jonathan Archer",
-      "reason": "The supplied TTS sheet cell contains Mr. Spock; the builder uses the correct Archer artwork with converted rules text."
+      "reason": "The supplied sheet cell contains Mr. Spock; use the recovered original one-card TTS object and its correct Jonathan Archer face."
     }
   ],
   "aliases": [

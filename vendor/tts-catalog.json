@@ -1320,11 +1320,15 @@
       "id": "Cap039",
       "name": "Jonathan Archer",
       "cost": 3,
+      "cardImage": "https://steamusercontent-a.akamaihd.net/ugc/5957769823492690291/F030E1F37A5E337701846EA0715FAF058205ECD3/",
+      "cardBack": "https://i.imgur.com/21bhPTi.jpg",
       "sheet": {
-        "ttsCardId": 942049
+        "ttsCardId": 316300,
+        "width": 1,
+        "height": 1,
+        "uniqueBack": false
       },
-      "skill": 5,
-      "assetSheet": "s14"
+      "skill": 5
     },
     {
       "type": "captain",

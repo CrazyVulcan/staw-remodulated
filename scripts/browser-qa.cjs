@@ -9,7 +9,7 @@ const {chromium}=require(process.env.STAW_NODE_MODULES?p.join(process.env.STAW_N
  assert.equal(await page.locator('#cost-editor').count(),0);
  await page.selectOption('#type','captain');await page.locator('#search').fill('Cap039');
  assert.equal(await page.locator('.catalog-entry').count(),1);
- assert.match(await page.locator('.fallback-art').getAttribute('src'),/cards\/art\/captain-Cap039\.png$/);
+ assert.match(await page.locator('.catalog-entry img').getAttribute('src'),/cards\/captain\/captain-Cap039\.webp$/);
  await page.selectOption('#type','ship');
  await page.locator('#search').fill('S274');assert.equal(await page.locator('.catalog-entry').count(),1);
  await page.locator('[data-add="ship:S274"]').click();assert.equal(await page.locator('#total').textContent(),'26');

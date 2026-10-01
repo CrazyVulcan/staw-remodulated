@@ -25,9 +25,12 @@ test('Every TTS route matches its original catalog identity and a local image',(
  const folders=fs.readdirSync(p.join(root,'public/cards'),{withFileTypes:true});
  assert.ok(folders.every(entry=>entry.isDirectory()));
  for(const folder of folders)assert.ok(fs.readdirSync(p.join(root,'public/cards',folder.name)).length<1000,folder.name);
- assert.equal(routes['captain:Cap039'].displayFallback,true);
- assert.equal(routes['captain:Cap039'].artImage,'cards/art/captain-Cap039.png');
- assert.ok(fs.existsSync(p.join(root,'public',routes['captain:Cap039'].artImage)));
+ const archer=routes['captain:Cap039'];
+ assert.equal(archer.face,'https://steamusercontent-a.akamaihd.net/ugc/5957769823492690291/F030E1F37A5E337701846EA0715FAF058205ECD3/');
+ assert.equal(archer.back,'https://i.imgur.com/21bhPTi.jpg');
+ assert.equal(archer.ttsCardId,316300);assert.equal(archer.width,1);assert.equal(archer.height,1);assert.equal(archer.index,0);
+ assert.equal(archer.displayFallback,undefined);assert.equal(archer.assetSheet,null);
+ assert.ok(fs.existsSync(p.join(root,'public',archer.localImage)));
 });
 test('Saved fleets normalize legacy aliases without dropping unknown IDs',()=>{
  const saved={ships:[{id:'ship:S274',upgrades:[{id:'tech:T311a'}]}]};
