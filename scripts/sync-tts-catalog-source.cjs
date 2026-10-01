@@ -8,15 +8,13 @@ const publicRoot='https://crazyvulcan.github.io/staw-remodulated/public/';
 const target=p.join(root,'vendor/tts-importer-source.lua');
 let lua=fs.readFileSync(target,'utf8');
 const routeById=new Map(Object.values(routes).map(route=>[route.id,route]));
+const dualSided=new Set(catalog.dualSidedCardIds||[]);
 const cards=catalog.cards.map(card=>{
- const route=routeById.get(card.id),asset=card.assetSheet&&catalog.assetSheets[card.assetSheet];
- // An individual front can replace a sheet only when its back is a single image.
- // Unique-back sheets still need their original paired cell until local backs exist.
- const canUsePublishedFront=route&&route.localImage&&(!asset||asset.uniqueBack!==true);
- if(!canUsePublishedFront)return card;
+ const route=routeById.get(card.id);
+ if(!route?.localImage)return card;
  const local=p.join(root,'public',route.localImage);
  if(!fs.existsSync(local))throw Error('Missing published card front: '+route.localImage);
- return {...card,publishedFace:publicRoot+route.localImage.replaceAll('\\','/')};
+ return {...card,publishedFace:publicRoot+route.localImage.replaceAll('\\','/'),dualSided:dualSided.has(card.id)};
 });
 const maneuverReferences={};
 for(const ship of data.ships){

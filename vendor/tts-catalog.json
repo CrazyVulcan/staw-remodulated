@@ -1,6 +1,25 @@
 {
   "schemaVersion": 1,
   "utopiaCommit": "478c9779ec901d2bae2a60d1aec625dcace0f148",
+  "genericCardBack": "https://i.imgur.com/21bhPTi.jpg",
+  "dualSidedCardIds": [
+    "R004a",
+    "R004b",
+    "R004c",
+    "R004e",
+    "R004f",
+    "R004g",
+    "R004h",
+    "R004i",
+    "R010a",
+    "R010b",
+    "R010c",
+    "R010d",
+    "R010e",
+    "R010f",
+    "R010g",
+    "R010h"
+  ],
   "cards": [
     {
       "type": "admiral",

@@ -95,7 +95,15 @@ test('Maneuver references cover every builder class with a card image or class g
 test('TTS deploy uses published card fronts, circular dials, and maneuver reference tiles',()=>{
  const lua=fs.readFileSync(p.join(root,'vendor/tts-importer-source.lua'),'utf8');
  assert.match(lua,/https:\/\/crazyvulcan\.github\.io\/staw-remodulated\/public\/cards\/resource\/resource-R028\.webp/);
- assert.match(lua,/if card\.publishedFace then card\.cardImage=card\.publishedFace;card\.sheet=nil end/);
+ assert.match(lua,/card\.cardImage=card\.publishedFace/);
+ assert.match(lua,/if not card\.dualSided then card\.cardBack=CATALOG_DATA\.genericCardBack end/);
+ assert.match(lua,/"genericCardBack":"https:\/\/i\.imgur\.com\/21bhPTi\.jpg"/);
+ const deployed=[...lua.matchAll(/\{target=CATALOG_DATA\["cards"\],offset=\d+,json=\[===\[(.*?)\]===\]\}/gs)].flatMap(match=>JSON.parse(match[1]));
+ const deployedBy=new Map(deployed.map(card=>[card.id,card]));
+ for(const route of Object.values(routes))assert.match(deployedBy.get(route.id).publishedFace,new RegExp('/public/'+route.localImage.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$'));
+ assert.equal(deployed.filter(card=>card.dualSided).length,16);
+ assert.equal(deployedBy.get('R004e').dualSided,true);
+ assert.equal(deployedBy.get('Cap039').dualSided,false);
  assert.match(lua,/CustomTile=\{Type=2,Thickness=0\.12/);
  assert.match(lua,/role=="reference"/);
  assert.match(lua,/https:\/\/crazyvulcan\.github\.io\/staw-remodulated\/public\/maneuvers\//);
