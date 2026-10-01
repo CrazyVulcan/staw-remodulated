@@ -8,6 +8,11 @@ function onLoad(saved)
         if ok and type(value) == "table" then memory = value end
     end
     if memory.role == "model" then self.interactable = false; self.setLock(true) end
+    if memory.role == "card" or memory.role == "upgrade" or memory.role == "fleetCard" then
+        self.addContextMenuItem("Spawn reminder token", function(color)
+            Global.call("STA2E_SpawnReminder", {object=self,color=color})
+        end)
+    end
     STA2E_DrawButtons()
     Wait.frames(function() Global.call("STA2E_Register", {object=self}) end, 2)
 end
@@ -1069,20 +1074,52 @@ local function managedObject(color)
     return nil,nil
 end
 
+local REMINDER_TOKEN_MESH="https://crazyvulcan.github.io/staw-remodulated/public/models/contentious-effect-token.obj"
+function STA2E_SpawnReminder(params)
+    local card=params and params.object
+    local color=params and params.color
+    local memory=metadata(card)
+    if not card or not own(color) or not memory then return end
+    local ship=memory.instanceId and STA2E.ships[memory.instanceId]
+    if (ship and ship.owner~=color) or (memory.owner and memory.owner~=color) then
+        tell(color,"Only the owning player can create this reminder.");return
+    end
+    local cardId=memory.cardId or memory.definitionId
+    local source=cardId and CATALOG[cardId]
+    if not source or not source.cardImage then tell(color,"This card has no reminder image.");return end
+    local p=card.getPosition()
+    local data={
+        Name="Custom_Model",Nickname="Reminder · "..(source.name or card.getName()),
+        Description="Contentious Effect / Reminder\n"..tostring(cardId),
+        GMNotes="STA2E_REMINDER|"..card.getGUID().."|"..tostring(cardId),
+        Transform={posX=0,posY=1.2,posZ=0,rotX=0,rotY=180,rotZ=0,scaleX=0.65,scaleY=0.65,scaleZ=0.65},
+        ColorDiffuse={r=1,g=1,b=1},Tags={"STA2E","Reminder"},Locked=false,Grid=true,Snap=true,
+        IgnoreFoW=false,MeasureMovement=false,DragSelectable=true,Autoraise=true,Sticky=true,
+        Tooltip=true,GridProjection=false,HideWhenFaceDown=false,Hands=false,
+        CustomMesh={MeshURL=REMINDER_TOKEN_MESH,DiffuseURL=source.cardImage,NormalURL="",ColliderURL=REMINDER_TOKEN_MESH,
+            Convex=true,MaterialIndex=3,TypeIndex=1,CustomShader={SpecularColor={r=1,g=1,b=1},SpecularIntensity=0,SpecularSharpness=2,FresnelStrength=0},CastShadows=true},
+        LuaScript="",LuaScriptState="",XmlUI=""
+    }
+    spawnObjectData({data=data,position={p.x+(color=="Blue" and -1.6 or 1.6),p.y+0.6,p.z},rotation={0,card.getRotation().y,0},callback_function=function(token)
+        if token then token.highlightOn(color,2) end
+    end})
+end
+
 local function managePanel()
     local parts={}
     for _,color in ipairs({"Blue","Red"}) do
         local card=managedObject(color)
         if card then
-            table.insert(parts,'<Panel id="manage'..color..'" visibility="'..color..'" rectAlignment="MiddleRight" offsetXY="-20 0" width="330" height="285" color="#102432F5">'..
-                '<Text text="MANAGE: '..xml(card.getName())..'" position="0 112 0" width="305" height="28" fontSize="18" color="#FFFFFF"/>'..
-                '<Text text="Players decide card-effect legality" position="0 82 0" width="305" height="22" fontSize="13" color="#C8D9E8"/>'..
-                '<Button id="time_add" onClick="STA2E_ManageAction" position="-82 42 0" width="145" height="34">+ TIME</Button>'..
-                '<Button id="time_remove" onClick="STA2E_ManageAction" position="82 42 0" width="145" height="34">- TIME</Button>'..
-                '<Button id="disable_add" onClick="STA2E_ManageAction" position="-82 1 0" width="145" height="34">+ DISABLE</Button>'..
-                '<Button id="disable_remove" onClick="STA2E_ManageAction" position="82 1 0" width="145" height="34">- DISABLE</Button>'..
-                '<Button id="discard" onClick="STA2E_ManageAction" position="-82 -52 0" width="145" height="34" color="#713839">DISCARD / FLIP</Button>'..
-                '<Button id="close" onClick="STA2E_ManageAction" position="82 -52 0" width="145" height="34">CLOSE</Button></Panel>')
+            table.insert(parts,'<Panel id="manage'..color..'" visibility="'..color..'" rectAlignment="MiddleRight" offsetXY="-20 0" width="330" height="330" color="#102432F5">'..
+                '<Text text="MANAGE: '..xml(card.getName())..'" position="0 132 0" width="305" height="28" fontSize="18" color="#FFFFFF"/>'..
+                '<Text text="Players decide card-effect legality" position="0 102 0" width="305" height="22" fontSize="13" color="#C8D9E8"/>'..
+                '<Button id="time_add" onClick="STA2E_ManageAction" position="-82 62 0" width="145" height="34">+ TIME</Button>'..
+                '<Button id="time_remove" onClick="STA2E_ManageAction" position="82 62 0" width="145" height="34">- TIME</Button>'..
+                '<Button id="disable_add" onClick="STA2E_ManageAction" position="-82 21 0" width="145" height="34">+ DISABLE</Button>'..
+                '<Button id="disable_remove" onClick="STA2E_ManageAction" position="82 21 0" width="145" height="34">- DISABLE</Button>'..
+                '<Button id="reminder" onClick="STA2E_ManageAction" position="0 -25 0" width="305" height="36" color="#285779">SPAWN REMINDER</Button>'..
+                '<Button id="discard" onClick="STA2E_ManageAction" position="-82 -78 0" width="145" height="34" color="#713839">DISCARD / FLIP</Button>'..
+                '<Button id="close" onClick="STA2E_ManageAction" position="82 -78 0" width="145" height="34">CLOSE</Button></Panel>')
         end
     end
     return table.concat(parts)
@@ -1171,6 +1208,7 @@ function STA2E_ManageAction(player,value,id)
     local card,m=managedObject(player.color)
     if not card then hud();return end
     if id=="close" then STA2E.manageCard[player.color]=nil;hud();return end
+    if id=="reminder" then STA2E_SpawnReminder({object=card,color=player.color});return end
     if id=="discard" then
         clearCardTokens(card)
         STA2E.manageCard[player.color]=nil

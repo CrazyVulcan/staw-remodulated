@@ -104,6 +104,11 @@ test('TTS deploy uses published card fronts, circular dials, and maneuver refere
  assert.equal(deployed.filter(card=>card.dualSided).length,16);
  assert.equal(deployedBy.get('R004e').dualSided,true);
  assert.equal(deployedBy.get('Cap039').dualSided,false);
+ assert.match(lua,/contentious-effect-token\.obj/);
+ assert.match(lua,/DiffuseURL=source\.cardImage/);
+ assert.match(lua,/Spawn reminder token/);
+ assert.match(lua,/id="reminder"[^>]*>SPAWN REMINDER/);
+ assert.ok(fs.existsSync(p.join(root,'public/models/contentious-effect-token.obj')));
  assert.match(lua,/CustomTile=\{Type=2,Thickness=0\.12/);
  assert.match(lua,/role=="reference"/);
  assert.match(lua,/https:\/\/crazyvulcan\.github\.io\/staw-remodulated\/public\/maneuvers\//);
