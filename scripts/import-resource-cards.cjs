@@ -18,12 +18,14 @@ function walk(value){
 }
 walk(save);
 
-const normalize=value=>String(value||'').toLowerCase().replace(/\bfleet captain\b|\bflagship\b/g,'').replace(/[^a-z0-9]/g,'');
+const normalize=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 function sourceFor(card){
  const exact=objects.filter(object=>String(object.Description||'').trim()===card.id);
  if(card.type==='resource')return exact.find(object=>object.CardID&&object.CustomDeck)||null;
  const tiles=objects.filter(object=>object.Name==='Custom_Tile'&&object.CustomImage);
- return tiles.find(object=>normalize(object.Nickname)===normalize(card.name))||exact.find(object=>object.Name==='Custom_Tile')||null;
+ const suffix=card.type==='flagship'?'Flagship':'Fleet Captain';
+ const expectedName=normalize(card.name+' '+suffix);
+ return tiles.find(object=>normalize(object.Nickname)===expectedName)||exact.find(object=>object.Name==='Custom_Tile')||null;
 }
 
 const assetUrl=value=>String(value||'').replace(/^http:/,'https:').replace('https://cloud-3.steamusercontent.com/','https://steamusercontent-a.akamaihd.net/');
