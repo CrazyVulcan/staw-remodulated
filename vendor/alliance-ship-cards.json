@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "source": "Alliance Ship Cards.json",
+  "sheet": {
+    "face": "https://steamusercontent-a.akamaihd.net/ugc/12941386263067143059/558C4A1E301B9AA11C5119D7B8B0462FE943C635/",
+    "back": "https://steamusercontent-a.akamaihd.net/ugc/12020036739026850548/1952CEDF8FBF6FAE69330AE3D62030A0CE562749/",
+    "width": 10,
+    "height": 7,
+    "uniqueBack": true
+  },
+  "cards": {
+    "285600": {
+      "id": "285600",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/AUH8GAH.jpg",
+      "sheetIndex": 0
+    },
+    "285700": {
+      "id": "285700",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/kITML73.jpg",
+      "sheetIndex": 1
+    },
+    "285800": {
+      "id": "285800",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/Ix1d2bq.jpg",
+      "sheetIndex": 2
+    },
+    "286000": {
+      "id": "286000",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/hBnKUSP.jpg",
+      "sheetIndex": 3
+    },
+    "286100": {
+      "id": "286100",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/rJQ35L3.jpg",
+      "sheetIndex": 4
+    },
+    "286800": {
+      "id": "286800",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/oXU9WSV.jpg",
+      "sheetIndex": 5
+    },
+    "286900": {
+      "id": "286900",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/2Q7Oe7H.png",
+      "sheetIndex": 6
+    },
+    "287000": {
+      "id": "287000",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/YtYlSbC.png",
+      "sheetIndex": 7
+    },
+    "288300": {
+      "id": "288300",
+      "className": "Cardassian Galor Class",
+      "classImage": "https://i.imgur.com/Dt3EJlq.png",
+      "profileImage": "https://i.imgur.com/sett7m3.png",
+      "sheetIndex": 8
+    },
+    "288400": {
+      "id": "288400",
+      "className": "Cardassian Galor Class",
+      "classImage": "https://i.imgur.com/Dt3EJlq.png",
+      "profileImage": "https://i.imgur.com/fHWY8Ag.png",
+      "sheetIndex": 9
+    },
+    "288500": {
+      "id": "288500",
+      "className": "Cardassian Galor Class",
+      "classImage": "https://i.imgur.com/Dt3EJlq.png",
+      "profileImage": "https://i.imgur.com/W990A1v.png",
+      "sheetIndex": 10
+    },
+    "288600": {
+      "id": "288600",
+      "className": "Cardassian Galor Class",
+      "classImage": "https://i.imgur.com/Dt3EJlq.png",
+      "profileImage": "https://i.imgur.com/M0ImKM2.jpg",
+      "sheetIndex": 11
+    },
+    "288700": {
+      "id": "288700",
+      "className": "Cardassian Galor Class",
+      "classImage": "https://i.imgur.com/Dt3EJlq.png",
+      "profileImage": "https://i.imgur.com/TMFiiG5.jpg",
+      "sheetIndex": 12
+    },
+    "288900": {
+      "id": "288900",
+      "className": "Jem'Hadar Battle Cruiser",
+      "classImage": "https://i.imgur.com/n7CZFNZ.png",
+      "profileImage": "https://i.imgur.com/Xax9nvN.png",
+      "sheetIndex": 13
+    },
+    "289000": {
+      "id": "289000",
+      "className": "Jem'Hadar Battle Cruiser",
+      "classImage": "https://i.imgur.com/n7CZFNZ.png",
+      "profileImage": "https://i.imgur.com/NWhDg5B.png",
+      "sheetIndex": 14
+    },
+    "289100": {
+      "id": "289100",
+      "className": "Jem'Hadar Battle Cruiser",
+      "classImage": "https://i.imgur.com/n7CZFNZ.png",
+      "profileImage": "https://i.imgur.com/OXDnGxY.png",
+      "sheetIndex": 15
+    },
+    "289200": {
+      "id": "289200",
+      "className": "Jem'Hadar Battle Cruiser",
+      "classImage": "https://i.imgur.com/n7CZFNZ.png",
+      "profileImage": "https://i.imgur.com/NwZ3M5A.png",
+      "sheetIndex": 16
+    },
+    "289300": {
+      "id": "289300",
+      "className": "Jem'Hadar Battle Cruiser",
+      "classImage": "https://i.imgur.com/n7CZFNZ.png",
+      "profileImage": "https://i.imgur.com/R67I2MA.jpg",
+      "sheetIndex": 17
+    },
+    "289500": {
+      "id": "289500",
+      "className": "Jem'Hadar Battleship",
+      "classImage": "https://i.imgur.com/TDHljCO.jpg",
+      "profileImage": "https://i.imgur.com/efyltPi.jpg",
+      "sheetIndex": 18
+    },
+    "289600": {
+      "id": "289600",
+      "className": "Jem'Hadar Battleship",
+      "classImage": "https://i.imgur.com/TDHljCO.jpg",
+      "profileImage": "https://i.imgur.com/xzbZ6kc.jpg",
+      "sheetIndex": 19
+    },
+    "289700": {
+      "id": "289700",
+      "className": "Jem'Hadar Battleship",
+      "classImage": "https://i.imgur.com/TDHljCO.jpg",
+      "profileImage": "https://i.imgur.com/FDoBFpA.jpg",
+      "sheetIndex": 20
+    },
+    "289800": {
+      "id": "289800",
+      "className": "Breen Battle Cruiser",
+      "classImage": "https://i.imgur.com/Ku84vYU.jpg",
+      "profileImage": "https://i.imgur.com/NUPW3XE.jpg",
+      "sheetIndex": 21
+    },
+    "289900": {
+      "id": "289900",
+      "className": "Breen Battle Cruiser",
+      "classImage": "https://i.imgur.com/Ku84vYU.jpg",
+      "profileImage": "https://i.imgur.com/akUGmEY.jpg",
+      "sheetIndex": 22
+    },
+    "290000": {
+      "id": "290000",
+      "className": "Breen Battle Cruiser",
+      "classImage": "https://i.imgur.com/Ku84vYU.jpg",
+      "profileImage": "https://i.imgur.com/8qlqT1I.jpg",
+      "sheetIndex": 23
+    },
+    "290100": {
+      "id": "290100",
+      "className": "Breen Battle Cruiser",
+      "classImage": "https://i.imgur.com/Ku84vYU.jpg",
+      "profileImage": "https://i.imgur.com/PTeQdDW.jpg",
+      "sheetIndex": 24
+    },
+    "324900": {
+      "id": "324900",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/YeqiO6g.jpg",
+      "sheetIndex": 25
+    },
+    "325000": {
+      "id": "325000",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/nR26SXh.jpg",
+      "sheetIndex": 26
+    },
+    "325100": {
+      "id": "325100",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/bOmIi7B.jpg",
+      "sheetIndex": 27
+    },
+    "325200": {
+      "id": "325200",
+      "className": "Jem'Hadar Attack Ship",
+      "classImage": "https://i.imgur.com/dnGGtw2.jpg",
+      "profileImage": "https://i.imgur.com/gTGxhNy.jpg",
+      "sheetIndex": 28
+    },
+    "325300": {
+      "id": "325300",
+      "className": "Cardassian Galor Class",
+      "classImage": "https://i.imgur.com/Dt3EJlq.png",
+      "profileImage": "https://i.imgur.com/yNrbouk.jpg",
+      "sheetIndex": 29
+    },
+    "325400": {
+      "id": "325400",
+      "className": "Cardassian Galor Class",
+      "classImage": "https://i.imgur.com/Dt3EJlq.png",
+      "profileImage": "https://i.imgur.com/NZMVgQD.png",
+      "sheetIndex": 30
+    },
+    "325500": {
+      "id": "325500",
+      "className": "Cardassian Galor Class",
+      "classImage": "https://i.imgur.com/Dt3EJlq.png",
+      "profileImage": "https://i.imgur.com/iT1bMJb.png",
+      "sheetIndex": 31
+    }
+  }
+}

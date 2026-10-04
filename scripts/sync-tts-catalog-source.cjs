@@ -8,15 +8,13 @@ const publicRoot='https://crazyvulcan.github.io/staw-remodulated/public/';
 const target=p.join(root,'vendor/tts-importer-source.lua');
 let lua=fs.readFileSync(target,'utf8');
 const routeById=new Map(Object.values(routes).map(route=>[route.id,route]));
+const dualSided=new Set(catalog.dualSidedCardIds||[]);
 const cards=catalog.cards.map(card=>{
- const route=routeById.get(card.id),asset=card.assetSheet&&catalog.assetSheets[card.assetSheet];
- // An individual front can replace a sheet only when its back is a single image.
- // Unique-back sheets still need their original paired cell until local backs exist.
- const canUsePublishedFront=route&&route.localImage&&(!asset||asset.uniqueBack!==true);
- if(!canUsePublishedFront)return card;
+ const route=routeById.get(card.id);
+ if(!route?.localImage)return card;
  const local=p.join(root,'public',route.localImage);
  if(!fs.existsSync(local))throw Error('Missing published card front: '+route.localImage);
- return {...card,publishedFace:publicRoot+route.localImage.replaceAll('\\','/')};
+ return {...card,publishedFace:publicRoot+route.localImage.replaceAll('\\','/'),dualSided:dualSided.has(card.id)};
 });
 const maneuverReferences={};
 for(const ship of data.ships){
@@ -38,6 +36,10 @@ const start=lua.indexOf('local startupJobs = {');
 const standard=lua.indexOf('STANDARD_BASE =',start);
 const end=lua.lastIndexOf('}',standard);
 if(start<0||standard<0||end<start)throw Error('Could not locate startupJobs in TTS importer source.');
-lua=lua.slice(0,start)+'local startupJobs = {\n'+jobs.join(',\n')+'\n}\n'+lua.slice(standard);
+const physicalJobs=lua.slice(start,standard).split(/\r?\n/)
+ .map(line=>line.trim().replace(/,$/,''))
+ .filter(line=>line.startsWith('{target=SHIP_DATA["ships"]')||line.startsWith('{target=SHIP_DATA["classes"]'));
+if(!physicalJobs.length)throw Error('Refusing to sync without the physical ship/class startup jobs.');
+lua=lua.slice(0,start)+'local startupJobs = {\n'+jobs.concat(physicalJobs).join(',\n')+'\n}\n'+lua.slice(standard);
 fs.writeFileSync(target,lua);
-console.log('Synced '+cards.length+' TTS catalog cards and '+Object.keys(maneuverReferences).length+' ship maneuver references in '+jobs.length+' startup chunks.');
+console.log('Synced '+cards.length+' TTS catalog cards and '+Object.keys(maneuverReferences).length+' ship maneuver references; preserved '+physicalJobs.length+' physical-definition chunks.');
