@@ -898,6 +898,11 @@ local function reviewFleet(fleet)
             local card=CATALOG[entry.cardId]
             if not card then return nil,"Unknown ID: "..tostring(entry.cardId) end
             if not card.cardImage or not card.cardBack then return nil,"No full-card asset for: "..entry.cardId end
+            if entry.allianceCaptain~=nil then
+                if not card.interactiveCaptain then return nil,"XP tracker requires an Alliance captain." end
+                local progress,progressError=STA2E.AllianceCaptain.progress(entry.allianceCaptain)
+                if not progress then return nil,progressError end
+            end
             total=total+1
             cost=cost+(tonumber(card.cost) or 0)
         end
@@ -1030,7 +1035,7 @@ function STA2E_ImportFleet(params)
                 local cardSide=left+((entry.hidden and anchorSlot or slot)-1)*spacing+(entry.hidden and fanDirection*hiddenOffset*0.38 or 0)
                 local cardForward=rowForward+(entry.hidden and hiddenOffset*0.12 or 0)
                 local target=playerSideTransform(color,boardPosition,{side=cardSide,forward=cardForward,up=entry.hidden and 0.39 or 0.35})
-                table.insert(jobs,{ship=s,cardId=entry.cardId,root=not group.standalone and j==1,hidden=entry.hidden==true,position=target.position,index=j-1,standalone=group.standalone})
+                table.insert(jobs,{ship=s,cardId=entry.cardId,root=not group.standalone and j==1,allianceCaptain=entry.allianceCaptain,hidden=entry.hidden==true,position=target.position,index=j-1,standalone=group.standalone})
             end
         end
     end
@@ -1064,7 +1069,7 @@ function STA2E_ImportFleet(params)
         data.GUID=nil;data.States=nil
         if not card.interactiveCaptain then data.LuaScript=MEMBER_SCRIPT;data.XmlUI="" end
         if job.root then data.Transform.scaleX=1.2;data.Transform.scaleZ=1.2 end
-        data.LuaScriptState=card.interactiveCaptain and STA2E.AllianceCaptain.pendingState(data,color,key) or JSON.encode({schemaVersion=1,role="pending",transaction=key})
+        data.LuaScriptState=card.interactiveCaptain and STA2E.AllianceCaptain.pendingState(data,color,key,job.allianceCaptain) or JSON.encode({schemaVersion=1,role="pending",transaction=key})
         local ok,spawnError=pcall(function()
             spawnObjectData({data=data,position=job.position,rotation={0,cardRotation,0},callback_function=function(object)
                 if STA2E.imports[key]~=tx then object.destruct();return end
@@ -2368,11 +2373,30 @@ end
 ;(function()
     local A={}
     STA2E.AllianceCaptain=A
-    function A.pendingState(data,color,transaction)
-        local state=decode(data.LuaScriptState) or {version=2}
+    function A.progress(value)
+        if type(value)~="table" or (value.version~=nil and value.version~=2) then return nil,"Invalid Alliance captain tracker." end
+        if value.name~=nil and (type(value.name)~="string" or #value.name>400) then return nil,"Invalid captain name." end
+        local state={version=2,name=value.name or ""}
+        for track,maximum in pairs({Elite=6,Skill=14,Crew=10,Weapon=10,Tech=10}) do
+            local n=value[track]
+            if n==nil then n=0 end
+            if type(n)~="number" or n~=n or n<0 or n>maximum or n~=math.floor(n) then return nil,"Invalid "..track.." XP." end
+            state[track]=n
+        end
+        local choices={None=true,Crew=true,Weapon=true,Tech=true}
+        for _,field in ipairs({"ExpansionOne","ExpansionTwo"}) do
+            local choice=value[field]
+            if choice==nil then choice="None" end
+            if type(choice)~="string" or not choices[choice] then return nil,"Invalid captain expansion slot." end
+            state[field]=choice
+        end
+        return state
+    end
+    function A.pendingState(data,color,transaction,progress)
+        local state=progress and assert(A.progress(progress)) or decode(data.LuaScriptState) or {version=2}
         state.memory={schemaVersion=1,role="pending",transaction=transaction}
         local player=Player[color]
-        state.name=player and player.steam_name and player.steam_name~="" and player.steam_name or "Alliance Captain"
+        if not progress or state.name=="" then state.name=player and player.steam_name and player.steam_name~="" and player.steam_name or "Alliance Captain" end
         data.Nickname=state.name
         return JSON.encode(state)
     end

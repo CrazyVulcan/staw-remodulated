@@ -23,13 +23,17 @@ The [current TTS playtest save and predictive AI](tts/staw/README.md) now live i
 5. Save the fleet as JSON. Fleets auto-save in this browser; downloaded fleets also include their cost profile. Import accepts Remodulated JSON, original Utopia URL hashes/JSON, TTS schema-2 JSON, or one-ID-per-line lists. Unknown IDs stop import instead of being dropped.
 6. Export to TTS, then paste the result into **Fleet Setup** in the supplied Remodulated save. Both familiar Utopia ID text and schema-2 JSON are supported.
 
-The **Alliance (Parts I–III)** expansion filter combines all three Alliance parts and the Alliance builder cards, including the interactive captains and AP upgrades.
+The single **Alliance** expansion combines Parts I, II and III with the Alliance builder cards, interactive captains and AP upgrades. Card details use the same expansion name.
 
 ## Bonus slots and flexible cards
 
-The captain library includes **Alliance Federation Captain (AC0001)**, **Alliance Klingon Captain (AC0009)**, and **Alliance Romulan Captain (AC0017)**. Each adds three Talent slots and two flexible Tech/Weapon/Crew slots to the ship's printed slots. All five captain slots are available in the builder; the player chooses which cards to equip for their XP unlocks. Equip one in the captain slot and export normally. Use the accompanying updated TTS save: it imports the supplied interactive XP tile, including its name input, point tracks, and expansion selectors. Name and XP editing stay in TTS. The initial captain is skill 2; the printed skill track reaches skill 9 at 14 XP. Its XP total is separate from the builder's fleet SP total.
+The captain library includes **Alliance Federation Captain (AC0001)**, **Alliance Klingon Captain (AC0009)**, and **Alliance Romulan Captain (AC0017)**. Each adds three Talent slots and two flexible Tech/Weapon/Crew slots to the ship's printed slots. All five captain slots remain available; choose cards to match your XP unlocks.
 
-All 26 visible Alliance AP upgrades have mapped TTS card assets, including **Reinforced Shielding (AP1014)**. Cards equipped in the captain's generated slots are included in saved fleets, totals, and both TTS export formats. `node scripts/alliance-loadout-qa.cjs` checks full loadouts, every flexible-slot type combination, old saved fleets, and AP1014 against the running local builder.
+Equip one to display **Alliance captain upgrades** below its ship's cards. Set the captain name, Talent/Captain Skill/Crew/Weapon/Tech XP, and both expansion choices. The five tracks match the TTS board's limits: 6/14/10/10/10. Captain Skill starts at 2 and gains 1 per 2 Skill XP, reaching 9. XP remains separate from fleet SP. Each ship keeps its own progress through saved files, browser reload, ship reordering and point-mode changes.
+
+After editing a tracker, the export dialog defaults to **TTS JSON**, carrying its name, XP tracks and expansion choices into the interactive tile in the updated TTS save. The **Card ID list (no XP)** option carries cards only. Older fleets without tracker data still load with zero XP; ordinary captains have no Alliance tracker. Progress is copied on import, rather than continuously synchronized between the website and TTS.
+
+All 26 visible Alliance AP upgrades have mapped TTS card assets, including **Reinforced Shielding (AP1014)**. Cards equipped in the captain's generated slots are included in saved fleets, totals, and both TTS export formats. `node scripts/alliance-loadout-qa.cjs` checks full loadouts, every flexible-slot type combination, old saved fleets, and AP1014 against the running local builder. `npm run test:captains` checks tracker controls, persistence, JSON round-trips, rejected imports, multiple captains, mobile layout and the combined Alliance expansion (start `npm start` first).
 
 The TTS tracker follows captain name/skill edits and ship-card name changes. The imported captain initially uses the importing player's display name. Renaming the ship card updates the ship part of the tracker row within about half a second; captain identity remains separate. Both XP and the ship association survive saving and loading TTS.
 

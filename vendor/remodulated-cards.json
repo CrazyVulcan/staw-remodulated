@@ -4,20 +4,20 @@
     "interactiveCaptain": true,
     "talents": 3,
     "additionalUpgradeSlots": [{"type": ["tech", "weapon", "crew"]}, {"type": ["tech", "weapon", "crew"]}],
-    "text": "Interactive Alliance captain card. Provides up to 3 Talent slots and 2 flexible Tech/Weapon/Crew slots; choose cards to match your XP unlocks. Edit your captain name and spend XP on the imported card in Tabletop Simulator. The tracker follows the captain name and skill. XP is tracked separately from the builder's fleet points."
+    "text": "Interactive Alliance captain card. Provides up to 3 Talent slots and 2 flexible Tech/Weapon/Crew slots; choose cards to match your XP unlocks. Equip this captain to edit its name, five XP tracks and expansion choices in the builder. TTS JSON exports carry progress into the interactive Tabletop Simulator card. XP is tracked separately from the builder's fleet points."
   },
   "captain:AC0009": {
     "name": "Alliance Klingon Captain",
     "interactiveCaptain": true,
     "talents": 3,
     "additionalUpgradeSlots": [{"type": ["tech", "weapon", "crew"]}, {"type": ["tech", "weapon", "crew"]}],
-    "text": "Interactive Alliance captain card. Provides up to 3 Talent slots and 2 flexible Tech/Weapon/Crew slots; choose cards to match your XP unlocks. Edit your captain name and spend XP on the imported card in Tabletop Simulator. The tracker follows the captain name and skill. XP is tracked separately from the builder's fleet points."
+    "text": "Interactive Alliance captain card. Provides up to 3 Talent slots and 2 flexible Tech/Weapon/Crew slots; choose cards to match your XP unlocks. Equip this captain to edit its name, five XP tracks and expansion choices in the builder. TTS JSON exports carry progress into the interactive Tabletop Simulator card. XP is tracked separately from the builder's fleet points."
   },
   "captain:AC0017": {
     "name": "Alliance Romulan Captain",
     "interactiveCaptain": true,
     "talents": 3,
     "additionalUpgradeSlots": [{"type": ["tech", "weapon", "crew"]}, {"type": ["tech", "weapon", "crew"]}],
-    "text": "Interactive Alliance captain card. Provides up to 3 Talent slots and 2 flexible Tech/Weapon/Crew slots; choose cards to match your XP unlocks. Edit your captain name and spend XP on the imported card in Tabletop Simulator. The tracker follows the captain name and skill. XP is tracked separately from the builder's fleet points."
+    "text": "Interactive Alliance captain card. Provides up to 3 Talent slots and 2 flexible Tech/Weapon/Crew slots; choose cards to match your XP unlocks. Equip this captain to edit its name, five XP tracks and expansion choices in the builder. TTS JSON exports carry progress into the interactive Tabletop Simulator card. XP is tracked separately from the builder's fleet points."
   }
 }

@@ -36,6 +36,46 @@ test("Three Alliance captain routes retain the supplied tile, artwork, XML, and 
     end
 end)
 
+test("Website XP progress initializes the correct imported captain and persists through reload",function()
+    _reset();_object("3b5e31",nil,{0,1,0})
+    local oldSpawn=spawnObjectData;local boards={}
+    spawnObjectData=function(params)
+        local object=oldSpawn(params)
+        if params.data and params.data.LuaScript and params.data.LuaScript:find("STA2E_CaptainSnapshot",1,true) then
+            boards[#boards+1]={object=object,env=attachBoard(object,params.data)}
+        end
+        return object
+    end
+    local ok,error=pcall(function()
+        local progress={version=2,name="Captain Ael",Elite=3,Skill=8,Crew=2,Weapon=1,Tech=4,ExpansionOne="Crew",ExpansionTwo="Tech"}
+        local result=STA2E_ImportFleet({color="Blue",fleet={schemaVersion=2,fleetId="website-captains",ships={
+            {shipCardId="S274",cards={{cardId="AC0001",role="captain",allianceCaptain=progress}}},
+            {shipCardId="S274",cards={{cardId="AC0009",role="captain",allianceCaptain={version=2,name="Captain Kor",Skill=2}}}}
+        }}})
+        assert(result.ok,result.error);_drain();assert(#boards==2)
+        local a,b=boards[1],boards[2]
+        assert(a.env.STA2E_CaptainSnapshot().name=="Captain Ael" and a.env.totalPoints==18 and a.env.SkillPoints==8)
+        assert(a.env.ExpansionOne=="Crew" and a.env.ExpansionTwo=="Tech")
+        assert(b.env.STA2E_CaptainSnapshot().name=="Captain Kor" and b.env.totalPoints==2)
+        local ship=STA2E.ships[a.env.memory.instanceId]
+        assert(ship.allianceCaptain.skill==6 and ship.allianceCaptain.xp==18)
+        local restored=attachBoard(a.object,CATALOG.AC0001.objectData,a.env.onSave())
+        assert(restored.SkillPoints==8 and restored.ExpansionTwo=="Tech" and restored.totalPoints==18)
+    end)
+    spawnObjectData=oldSpawn;assert(ok,tostring(error))
+end)
+
+test("Invalid website XP metadata fails before spawning or changing the fleet",function()
+    for _,progress in ipairs({{version=3},{Skill=15},{Elite=-1},{Tech=1.5},{Crew="2"},{Crew=false},{ExpansionOne="Borg"},{ExpansionOne=false}}) do
+        _reset();_object("3b5e31",nil,{0,1,0})
+        local result=STA2E_ImportFleet({color="Blue",fleet={schemaVersion=2,ships={{shipCardId="S274",cards={{cardId="AC0001",allianceCaptain=progress}}}}}})
+        assert(not result.ok);assert(next(STA2E.ships)==nil and next(STA2E.imports)==nil)
+    end
+    local invalid={schemaVersion=2,ships={{shipCardId="S274",cards={{cardId="C441",allianceCaptain={Skill=2}}}}}}
+    local result=STA2E_ImportFleet({color="Blue",fleet=invalid})
+    assert(not result.ok)
+end)
+
 test("Every captain track calculates XP, clamps to the printed track, and preserves expansion choices",function()
     for _,id in ipairs(ids) do
         local ship,board,env,attributes=captainShip("xp-"..id,id)

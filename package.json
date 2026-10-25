@@ -19,6 +19,7 @@
     "build:tts": "node scripts/build-tts-staw.cjs",
     "check:tts": "node scripts/build-tts-staw.cjs --check",
     "test:staw": "node scripts/test-tts-staw.cjs",
-    "test:site": "node scripts/site-routes-qa.cjs"
+    "test:site": "node scripts/site-routes-qa.cjs",
+    "test:captains": "node scripts/alliance-captain-trackers-qa.cjs"
   }
 }

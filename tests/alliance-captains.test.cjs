@@ -2,6 +2,24 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const root=p.resolve(__dirname,'..'),core=require('../src/core.js');
 const rules=require('../src/rules.js');
 const read=name=>JSON.parse(fs.readFileSync(p.join(root,name),'utf8'));
+test('Captain XP state stays bounded, derives skill, and remains separate from fleet cost',()=>{
+ const state=core.captainProgress({version:2,name:"Captain T'Pol",Elite:6,Skill:14,Crew:10,Weapon:10,Tech:10,ExpansionOne:'Crew',ExpansionTwo:'Tech'});
+ assert.deepEqual(core.captainSummary(state),{xp:50,skill:9});
+ assert.deepEqual(core.captainSummary(),{xp:0,skill:2});
+ for(const edit of [s=>s.Skill=15,s=>s.Elite=-1,s=>s.Crew=1.5,s=>s.Tech='3',s=>s.version=3,s=>s.ExpansionOne='Borg',s=>s.name='x'.repeat(101)]){
+  const invalid={...state};edit(invalid);assert.throws(()=>core.captainProgress(invalid));
+ }
+ const data=read('public/data/data.json'),routes=read('public/data/tts-routes.json');
+ const captain={...data.captains.find(c=>c.id==='AC0001'),allianceCaptain:state};
+ const live={ships:[{...data.ships.find(s=>s.id==='S274'),captain}]};
+ const saved=core.withCaptainProgress(live,{ships:[{id:'ship:S274',captain:{id:'captain:AC0001'}}]});
+ const by=Object.fromEntries([live.ships[0],captain].map(card=>[core.key(card),card]));
+ assert.deepEqual(core.canonicalize(saved,{},by).ships[0].captain.allianceCaptain,state);
+ assert.deepEqual(JSON.parse(core.ttsExport(live,routes,'json')).ships[0].cards[0].allianceCaptain,state);
+ assert.equal(captain.cost,0);assert.equal(live.ships[0].cost,26);
+ assert.match(core.ttsExport(live,routes),/^S274\nAC0001\n/);
+ const bad={ships:[{id:'ship:S274',allianceCaptain:state}]};assert.throws(()=>core.canonicalize(bad,{},by),/requires an Alliance captain/);
+});
 test('Federation, Klingon, and Romulan Alliance captains export exact interactive object IDs',()=>{
  const data=read('public/data/data.json'),routes=read('public/data/tts-routes.json'),catalog=read('vendor/tts-catalog.json');
  const ships=data.ships,objects=read('vendor/alliance-captain-objects.json');
