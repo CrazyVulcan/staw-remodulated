@@ -1,4 +1,5 @@
 'use strict';
+const m5Nav=document.createElement('a');m5Nav.href='m5.html';m5Nav.textContent='M5 fleets';m5Nav.style.cssText='color:inherit;padding:8px';document.querySelector('nav[aria-label="Fleet tools"]').append(m5Nav);
 const $el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nice=s=>String(s).replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase()),key=FleetCore.key;
 const runtimeConfig=typeof window==='object'&&window.RemodulatedConfig?window.RemodulatedConfig:{};

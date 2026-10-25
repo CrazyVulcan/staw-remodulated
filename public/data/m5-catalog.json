@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "status": "prototype",
+  "ships": [
+    {"id":"M5S001","profileId":"neghvar","name":"Neg'Var","faction":"Klingon","class":"Negh'var Class","physicalShipId":"S193","baseCaptainSkill":4,"baseThreat":6,"slotCapacity":4}
+  ],
+  "programs": [
+    {"id":"focused_barrage","name":"Focused Barrage","faction":"Klingon","classes":["Negh'var Class","Vor'cha Class"],"csModifier":3,"threat":3,"slots":2,"status":"prototype adaptation","text":"When declaring a primary attack, select the defender as fleet focus and add one attack die."},
+    {"id":"hunters_algorithm","name":"Hunter's Algorithm","faction":"Klingon","classes":["Negh'var Class","K'Vort Class","B'Rel Class"],"csModifier":-2,"threat":1,"slots":1,"status":"prototype proof program","text":"After moving, prefer Target Lock when a legal enemy is available. Lower CS lets this ship activate earlier."}
+  ]
+}
