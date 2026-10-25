@@ -1,11 +1,30 @@
 ;(function()
     local A={}
     STA2E.AllianceCaptain=A
-    function A.pendingState(data,color,transaction)
-        local state=decode(data.LuaScriptState) or {version=2}
+    function A.progress(value)
+        if type(value)~="table" or (value.version~=nil and value.version~=2) then return nil,"Invalid Alliance captain tracker." end
+        if value.name~=nil and (type(value.name)~="string" or #value.name>400) then return nil,"Invalid captain name." end
+        local state={version=2,name=value.name or ""}
+        for track,maximum in pairs({Elite=6,Skill=14,Crew=10,Weapon=10,Tech=10}) do
+            local n=value[track]
+            if n==nil then n=0 end
+            if type(n)~="number" or n~=n or n<0 or n>maximum or n~=math.floor(n) then return nil,"Invalid "..track.." XP." end
+            state[track]=n
+        end
+        local choices={None=true,Crew=true,Weapon=true,Tech=true}
+        for _,field in ipairs({"ExpansionOne","ExpansionTwo"}) do
+            local choice=value[field]
+            if choice==nil then choice="None" end
+            if type(choice)~="string" or not choices[choice] then return nil,"Invalid captain expansion slot." end
+            state[field]=choice
+        end
+        return state
+    end
+    function A.pendingState(data,color,transaction,progress)
+        local state=progress and assert(A.progress(progress)) or decode(data.LuaScriptState) or {version=2}
         state.memory={schemaVersion=1,role="pending",transaction=transaction}
         local player=Player[color]
-        state.name=player and player.steam_name and player.steam_name~="" and player.steam_name or "Alliance Captain"
+        if not progress or state.name=="" then state.name=player and player.steam_name and player.steam_name~="" and player.steam_name or "Alliance Captain" end
         data.Nickname=state.name
         return JSON.encode(state)
     end

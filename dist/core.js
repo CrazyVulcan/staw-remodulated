@@ -2,11 +2,33 @@
  const key=c=>(c.catalogType||c.type)+':'+c.id;
  const VIRTUAL_CARDS=new Set(['resource:R004','resource:R010','question:Q030','crew:C426']);
  const isVirtual=c=>VIRTUAL_CARDS.has(typeof c==='string'?c:key(c));
+ const CAPTAIN_TRACKS={Elite:6,Skill:14,Crew:10,Weapon:10,Tech:10};
+ function captainProgress(value={}){
+  if(!value||typeof value!=='object'||Array.isArray(value)||(value.version!==undefined&&value.version!==2))throw Error('Invalid Alliance captain tracker.');
+  if(value.name!==undefined&&(typeof value.name!=='string'||value.name.length>100))throw Error('Captain name must be at most 100 characters.');
+  const state={version:2,name:value.name||''};
+  for(const [track,max]of Object.entries(CAPTAIN_TRACKS)){
+   const n=value[track]??0;if(!Number.isInteger(n)||n<0||n>max)throw Error('Invalid '+track+' XP: use 0–'+max+'.');state[track]=n;
+  }
+  for(const field of ['ExpansionOne','ExpansionTwo']){const type=value[field]??'None';if(!['None','Crew','Weapon','Tech'].includes(type))throw Error('Invalid captain expansion slot.');state[field]=type;}
+  return state;
+ }
+ function captainSummary(value){const state=captainProgress(value);return {xp:Object.keys(CAPTAIN_TRACKS).reduce((n,key)=>n+state[key],0),skill:2+Math.floor(state.Skill/2)};}
+ function withCaptainProgress(live,saved){
+  function visit(card,out){
+   if(!card||!out)return;
+   if(card.interactiveCaptain&&card.allianceCaptain)out.allianceCaptain=captainProgress(card.allianceCaptain);
+   for(const field of ['resource','captain','admiral','ambassador','construction'])if(card[field])visit(card[field],out[field]);
+   for(const field of ['upgrades','upgradeSlots'])(card[field]||[]).forEach((slot,i)=>visit(slot.occupant,out[field]?.[i]));
+  }
+  live.ships.forEach((ship,i)=>visit(ship,saved.ships[i]));visit(live.resource,saved.resource);return saved;
+ }
  function resolve(id,aliases,byKey){const found=byKey[aliases[id]||id];if(!found)throw Error('Unknown card ID: '+id);return found;}
  function canonicalize(saved,aliases,byKey){
   if(!saved||!Array.isArray(saved.ships))throw Error('Fleet must contain a ships array.');
   function card(value,depth=0){if(depth>12)throw Error('Fleet nesting is too deep.');if(!value||!value.id)return {};
    const c=resolve(value.id,aliases,byKey),out={id:key(c)};
+   if(value.allianceCaptain!==undefined){if(!c.interactiveCaptain)throw Error('XP tracker requires an Alliance captain.');out.allianceCaptain=captainProgress(value.allianceCaptain);}
    for(const field of ['resource','captain','admiral','ambassador','construction'])if(value[field])out[field]=card(value[field],depth+1);
    for(const field of ['upgrades','upgradeSlots'])if(value[field]){if(!Array.isArray(value[field]))throw Error('Invalid '+field);out[field]=value[field].map(x=>card(x,depth+1));}
    return out;
@@ -21,7 +43,7 @@
   const groups=[...fleet.ships.map(card=>walkEntries(card).filter(entry=>!isVirtual(entry.card))),...(fleet.resource?[walkEntries(fleet.resource).filter(entry=>!isVirtual(entry.card))]:[])],all=groups.flat().map(entry=>entry.card),missing=all.filter(c=>!routes[key(c)]);
   if(missing.length)throw Error('These cards have no verified route in the supplied TTS save: '+[...new Set(missing.map(c=>c.name+' ('+c.id+')'))].join(', ')+'. Nothing was exported.');
   let rows=1,used=0;for(const group of groups){if(group.length>14)throw Error('A group exceeds TTS’s 14-card row limit.');const need=group.length+(used?2:0);if(used+need>14){rows++;used=group.length;}else used+=need;}if(rows>3)throw Error('This fleet exceeds TTS’s three rows of 14 spaces.');
-  const entry=value=>({cardId:routes[key(value.card)].id,role:routes[key(value.card)].type,...(value.hidden?{hidden:true}:{})});
+  const entry=value=>({cardId:routes[key(value.card)].id,role:routes[key(value.card)].type,...(value.hidden?{hidden:true}:{}),...(value.card.interactiveCaptain&&value.card.allianceCaptain?{allianceCaptain:captainProgress(value.card.allianceCaptain)}:{})});
   const payload={schemaVersion:2,source:{kind:options.sourceKind||'remodulated',version:options.version||'1.0.0'},ships:fleet.ships.map(s=>({shipCardId:routes[key(s)].id,cards:walkEntries(s).slice(1).filter(value=>!isVirtual(value.card)).map(entry)})),resources:walkEntries(fleet.resource).filter(value=>!isVirtual(value.card)).map(entry)};
   if(mode==='json')return JSON.stringify(payload,null,2);
   const id=c=>(c.hidden?'#':'')+c.cardId;
@@ -35,5 +57,5 @@
   if(missing.some(row=>!byKey[key(row)]?.interactiveCaptain))throw Error('Saved cost profile is incomplete.');
   return current.map(row=>existing.get(key(row))||row);
  }
- return {key,isVirtual,resolve,canonicalize,walkEntries,walk,ttsExport,validateCosts,migrateCosts};
+ return {key,isVirtual,resolve,canonicalize,walkEntries,walk,ttsExport,validateCosts,migrateCosts,CAPTAIN_TRACKS,captainProgress,captainSummary,withCaptainProgress};
 });

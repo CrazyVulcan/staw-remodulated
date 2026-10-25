@@ -10,6 +10,7 @@ Load `STAW_Remodulated_AI_Anticipation_2026_10_19.json` in Tabletop Simulator. C
 - Guide heights follow the playmat surface; the two-player setup helper faces correctly. Dice controls fit the player's custom tray. Generic class ship references accompany maneuver cards.
 - Decorative ship models follow bases after they settle. The follower never changes the base's position or velocity, avoiding the earlier physics tugging.
 - Alliance Parts I–III mission tools, interactive captain names/XP, three Talent slots, two flexible captain slots and mapped AP upgrades are included from the preceding local passes.
+- Alliance captain progress from website TTS JSON exports initializes the matching captain tile's name, all five XP tracks and both expansion choices. Invalid tracker data is rejected before spawning. Exports without this optional data retain the importing player's name and default tracks.
 
 ## Editable sources and rebuilding
 
@@ -28,6 +29,6 @@ Build updates the included release from those Lua sources and refreshes its chec
 
 ## Validation and limits
 
-The offline harness compiles 110 packaged/generated Lua scripts and runs 262 behavior checks. It covers missions, movement, collision resolution, ownership, captain state, class references, tray controls and predictive navigation. The ordinary Node suite also imports an M5 website export through this packaged runtime and checks tracker authorization, persistence and repeated-action guards.
+The offline harness compiles 110 packaged/generated Lua scripts and runs 264 behavior checks. It covers missions, movement, collision resolution, ownership, captain state and website progress imports, class references, tray controls and predictive navigation. The ordinary Node suite also imports an M5 website export through this packaged runtime and checks tracker authorization, persistence and repeated-action guards.
 
 These are Fengari/Lua 5.3 checks with mocked TTS APIs. Live TTS physics, asset loading, multiplayer behavior and tactical strength still require playtesting. Forecast coverage is a heuristic over modeled routes, not a calibrated hit probability. Captain Skill controls timing; it does not set AI intelligence.

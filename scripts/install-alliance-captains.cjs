@@ -10,8 +10,11 @@ function patch(lua){
   function once(a,b){assert.equal(lua.split(a).length,2,'Expected unique patch: '+a.slice(0,90));lua=lua.replace(a,b);}
   once('local function cardData(card)\n','local function cardData(card)\n    if card and card.interactiveCaptain then return copy(card.objectData) end\n');
   once('data.GUID=nil;data.States=nil;data.LuaScript=MEMBER_SCRIPT;data.XmlUI=""','data.GUID=nil;data.States=nil\n        if not card.interactiveCaptain then data.LuaScript=MEMBER_SCRIPT;data.XmlUI="" end');
-  once('data.LuaScriptState=JSON.encode({schemaVersion=1,role="pending",transaction=key})','data.LuaScriptState=card.interactiveCaptain and STA2E.AllianceCaptain.pendingState(data,color,key) or JSON.encode({schemaVersion=1,role="pending",transaction=key})');
+  once('data.LuaScriptState=JSON.encode({schemaVersion=1,role="pending",transaction=key})','data.LuaScriptState=card.interactiveCaptain and STA2E.AllianceCaptain.pendingState(data,color,key,job.allianceCaptain) or JSON.encode({schemaVersion=1,role="pending",transaction=key})');
   once('STA2E.ships[s.instanceId]=s;commit(s);spawnFleetShields(s);deploy(s);refresh(s)','STA2E.ships[s.instanceId]=s;STA2E.AllianceCaptain.syncShipName(s);STA2E.AllianceCaptain.syncCaptain(s);commit(s);spawnFleetShields(s);deploy(s);refresh(s)');
+  once('root=not group.standalone and j==1,hidden=entry.hidden==true,','root=not group.standalone and j==1,allianceCaptain=entry.allianceCaptain,hidden=entry.hidden==true,');
+  const reviewAnchor="            if not card.cardImage or not card.cardBack then return nil,\"No full-card asset for: \"..entry.cardId end\n";
+  once(reviewAnchor,reviewAnchor+"            if entry.allianceCaptain~=nil then\n                if not card.interactiveCaptain then return nil,\"XP tracker requires an Alliance captain.\" end\n                local progress,progressError=STA2E.AllianceCaptain.progress(entry.allianceCaptain)\n                if not progress then return nil,progressError end\n            end\n");
   const captainStart=lua.indexOf('local function captainFor(s)');
   const captainEnd=lua.indexOf('\nlocal function skillFor(s)',captainStart);
   assert(captainStart>=0&&captainEnd>captainStart);

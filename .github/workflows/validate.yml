@@ -18,3 +18,22 @@ jobs:
       - run: npm run check:tts
       - run: npm run test:tts
       - run: npm run test:staw
+  captain-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Verify captain trackers and built site
+        env:
+          STAW_BROWSER_CHANNEL: chromium
+        run: |
+          npm start > /tmp/staw-server.log 2>&1 &
+          for i in {1..30}; do curl --silent --fail http://127.0.0.1:4173/ > /dev/null && break; sleep 1; done
+          npm run test:captains
+          npm run test:site
