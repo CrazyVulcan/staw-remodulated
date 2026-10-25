@@ -18,6 +18,27 @@ test('Alliance-only cards without a loadable TTS route are suppressed',()=>{
  for(const id of ['AC0001','AC0009','AC0017'])assert.ok(by['captain:'+id]?.interactiveCaptain);
  assert.ok(by['crew:AP1001']);assert.ok(routes['crew:AP1001']);
 });
+
+test('Verified AP copies are hidden from the library without changing their saved IDs or routes',()=>{
+ const visible=rules.libraryCards(cards),visibleKeys=new Set(visible.map(core.key));
+ const text=value=>String(value||'').replace(/<img\b[^>]*effect_auxilary[^>]*>/gi,'[aux]').replace(/<img\b[^>]*effect_time_token[^>]*>/gi,'[time]').replace(/\s+/g,' ').trim();
+ const comparable=card=>Object.fromEntries(Object.entries(card).filter(([key])=>!['id','set','image','alliance'].includes(key)).map(([key,value])=>[key,key==='text'?text(value):value]));
+ assert.equal(Object.keys(rules.AP_DUPLICATES).length,26);
+ for(const [id,originalId]of Object.entries(rules.AP_DUPLICATES)){
+  const duplicate=cards.find(c=>c.id===id),original=by[duplicate.type+':'+originalId];
+  assert.deepEqual(comparable(duplicate),comparable(original),id+' is no longer equivalent; review suppression');
+  assert(!visibleKeys.has(core.key(duplicate)),id);assert(visibleKeys.has(core.key(original)),originalId);
+  assert(original.set.some(id=>data.sets.find(set=>set.id===id)?.parentSet==='Alliance'),originalId+' must remain in Alliance');
+  const saved={ships:[{id:'ship:S274',upgrades:[{id:core.key(duplicate)}]}]};
+  assert.equal(core.canonicalize(saved,aliases,by).ships[0].upgrades[0].id,core.key(duplicate));
+  const exported=JSON.parse(core.ttsExport({ships:[{...by['ship:S274'],upgrades:[{occupant:duplicate}]}]},routes,'json'));
+  assert.equal(exported.ships[0].cards[0].cardId,id);
+ }
+ const ap=by['crew:AP1005'];assert.deepEqual(rules.libraryCards([ap]),[ap],'Keep AP cards when their counterpart is absent');
+ const unique={...ap,id:'AP9999',name:'Distinct Alliance upgrade'};
+ assert(rules.libraryCards([unique,by['crew:C362']]).includes(unique),'Keep unreviewed AP cards');
+ assert.equal(cards.length,2299);
+});
 test('Every TTS route matches its original catalog identity and a local image',()=>{
  const catalog=read('vendor/tts-catalog.json');const original=new Map(catalog.cards.map(c=>[c.id,c]));
  assert.equal(Object.keys(routes).length,2197);
