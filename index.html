@@ -1,24 +1,74 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101823"><title>Remodulated · Star Trek Attack Wing Fleet Builder</title><meta name="description" content="Build, compare and deploy Star Trek Attack Wing fleets. Utopia rules, authentic cards and validated Tabletop Simulator exports."><link rel="icon" href="public/favicon.svg"><link rel="stylesheet" href="public/css/font-staw.css"><link rel="stylesheet" href="style.css"></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07111b">
+  <title>Remodulated · Choose a Builder</title>
+  <meta name="description" content="Choose the Remodulated fleet builder for Star Trek Attack Wing or M5.">
+  <link rel="icon" href="src/favicon.svg">
+  <link rel="stylesheet" href="public/css/font-staw.css">
+  <link rel="stylesheet" href="landing.css">
+</head>
 <body>
-<header class="masthead"><div class="brand"><span class="brand-mark fs fs-federation" aria-hidden="true"></span><div><span class="eyebrow">STAR TREK ATTACK WING</span><h1>REMODULATED<span class="brand-sub"> / FLEET BUILDER</span></h1></div></div><label class="fleet-name"><span>FLEET</span><input id="fleet-name" value="Untitled fleet" maxlength="100" aria-label="Fleet name"></label><div class="fleet-settings"><label>POINTS<select id="point-mode"><option value="standard">Utopia</option><option value="spuds">SPUDS</option></select></label><label>LIMIT<input id="budget" type="number" value="130" min="1" max="9999"></label><div class="fleet-total"><strong id="total">0</strong><span>/ <span id="limit">130</span></span><small id="remaining">130 available</small></div></div><nav aria-label="Fleet tools"><button id="import">Import</button><button id="save">Save</button><button id="export" class="primary">TTS export <span aria-hidden="true">↗</span></button></nav></header>
-<main class="workspace">
-<section class="library" aria-labelledby="library-title"><div class="section-heading"><h2 id="library-title">Card library</h2><span id="library-count" class="count">Loading catalog…</span></div><div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search name, ID, class or card text…" aria-label="Search cards"></div>
-<div class="filters"><label>Faction<select id="faction"><option value="">All factions</option></select></label><label>Card type<select id="type"><option value="ship">Ships</option></select></label><label>Sort by<select id="sort"><option value="name">Name A–Z</option><option value="cost">Cost: low to high</option><option value="cost-desc">Cost: high to low</option><option value="id">Card ID</option><option value="skill">Captain skill</option></select></label><label>Expansion<select id="set"><option value="">All expansions</option></select></label></div>
-<div class="library-options"><label><input type="checkbox" id="tts-only" checked> TTS-ready cards</label><label><input type="checkbox" id="unique-only"> Unique only</label></div><div id="catalog" class="catalog" aria-live="polite"><p class="empty">Preparing your card library…</p></div><div class="pagination"><button id="prev" aria-label="Previous page">← Previous</button><span id="page-info"></span><button id="next" aria-label="Next page">Next →</button></div></section>
-<section class="fleet-workspace" aria-labelledby="fleet-title"><div class="section-heading"><div><span class="eyebrow">TACTICAL OVERVIEW</span><h2 id="fleet-title">Your fleet</h2></div><div class="view-controls"><button id="spread" class="active" aria-pressed="true">Spread</button><button id="list" aria-pressed="false">List</button><button id="clear" class="quiet">Clear</button></div></div><p id="equip-target" class="target-note">Select a ship to assign its captain and upgrades.</p><div id="fleet"></div><div id="validation" aria-live="polite"></div></section></main>
-<footer><span id="catalog-stats">Star Trek Attack Wing Remodulated</span><div><a data-asset-path="data/card-costs.json" download>Editable card costs</a><a data-asset-path="data/id-audit.json" download>ID audit</a><a href="https://github.com/AngryTribble/Star-Trek-Attack-Wing-Utopia" target="_blank" rel="noreferrer">Utopia credits</a></div></footer>
-<dialog id="modal"><button id="close-modal" class="close" aria-label="Close dialog">×</button><div id="modal-content"></div></dialog><div id="toast" role="status" aria-live="polite"></div>
-<script>
-  window.RemodulatedConfig={assetBase:'public'};
-  window.remodulatedAssetPath = path => {
-    const clean = String(path).replace(/^\/+/, '');
-    const base = String(window.RemodulatedConfig?.assetBase || '').replace(/\/+$/, '');
-    return (base ? base + '/' : '') + (base && clean.startsWith(base + '/') ? clean.slice(base.length + 1) : clean);
-  };
-  for (const link of document.querySelectorAll('[data-asset-path]')) {
-    link.href = window.remodulatedAssetPath(link.dataset.assetPath);
-  }
-</script>
-<script src="public/vendor/jquery.js"></script><script src="public/vendor/angular.js"></script><script src="public/vendor/angular-sanitize.js"></script><script src="public/vendor/utopia.js"></script><script src="src/core.js"></script><script src="src/rules.js"></script><script src="src/app.js"></script>
-</body></html>
+  <a class="skip-link" href="#builders">Skip to builders</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="./" aria-label="Remodulated home">
+      <img src="src/favicon.svg" alt="">
+      <span><b>REMODULATED</b><small>Fleet Builders</small></span>
+    </a>
+    <span class="system-status"><i></i> Ready</span>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">TABLETOP SIMULATOR FLEET TOOLS</p>
+      <h1 id="page-title">Choose a game</h1>
+      <p>Build a fleet, check its assignments, save it locally, and export it for Tabletop Simulator.</p>
+    </section>
+
+    <section class="builder-grid" id="builders" aria-label="Available fleet builders">
+      <article class="builder-card staw-card">
+        <div class="card-heading">
+          <span class="game-code">STAW</span>
+          <span class="availability"><i></i> Full catalog</span>
+        </div>
+        <div class="game-title">
+          <img src="src/favicon.svg" alt="">
+          <div><p>Star Trek</p><h2>Attack Wing</h2></div>
+        </div>
+        <p class="summary">The complete Remodulated fleet builder for standard Attack Wing play.</p>
+        <ul>
+          <li><b>2,296</b> cards</li>
+          <li>Ships, captains, upgrades, and resources</li>
+          <li>Maneuver references and TTS fleet export</li>
+        </ul>
+        <a class="launch" href="staw/"><span>Launch STAW builder</span><b aria-hidden="true">›</b></a>
+      </article>
+
+      <article class="builder-card m5-card">
+        <div class="card-heading">
+          <span class="game-code">M5</span>
+          <span class="availability"><i></i> Klingon V3.2</span>
+        </div>
+        <div class="game-title">
+          <span class="m5-mark" aria-hidden="true">M5</span>
+          <div><p>M5</p><h2>Fleet Operations</h2></div>
+        </div>
+        <p class="summary">The developing M5 builder with the current Klingon ship and ability-card set.</p>
+        <ul>
+          <li><b>6</b> Klingon ships</li>
+          <li><b>26</b> M5 ability cards</li>
+          <li>Independent fleet saves and exports</li>
+        </ul>
+        <a class="launch" href="m5/"><span>Launch M5 builder</span><b aria-hidden="true">›</b></a>
+      </article>
+    </section>
+
+    <p class="note">Fleets are saved in this browser. No account is required.</p>
+  </main>
+
+  <footer><span>REMODULATED</span><span>Star Trek Attack Wing 2E project</span></footer>
+</body>
+</html>

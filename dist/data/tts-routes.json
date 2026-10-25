@@ -10555,6 +10555,66 @@
     "localImage": "cards/captain/captain-Cap901.webp",
     "aspect": 0.7196307094266278
   },
+  "captain:AC0001": {
+    "id": "AC0001",
+    "type": "captain",
+    "name": "Alliance Federation Captain",
+    "face": "https://steamusercontent-a.akamaihd.net/ugc/1758061184414041256/19386A77E4383092089749DC0945B1ADCA319A96/",
+    "back": "https://i.imgur.com/21bhPTi.jpg",
+    "width": 1,
+    "height": 1,
+    "index": 0,
+    "ttsCardId": null,
+    "assetSheet": null,
+    "objectKind": "alliance-captain",
+    "objectScale": {
+      "x": 1.6422503,
+      "y": 1,
+      "z": 1.6422503
+    },
+    "localImage": "cards/captain/captain-AC0001.webp",
+    "aspect": 1.5678524374176548
+  },
+  "captain:AC0009": {
+    "id": "AC0009",
+    "type": "captain",
+    "name": "Alliance Klingon Captain",
+    "face": "https://steamusercontent-a.akamaihd.net/ugc/2001325032159922848/7215412F5C9A22F32305511A27E5920FCD91B937/",
+    "back": "https://i.imgur.com/21bhPTi.jpg",
+    "width": 1,
+    "height": 1,
+    "index": 0,
+    "ttsCardId": null,
+    "assetSheet": null,
+    "objectKind": "alliance-captain",
+    "objectScale": {
+      "x": 1.6422503,
+      "y": 1,
+      "z": 1.6422503
+    },
+    "localImage": "cards/captain/captain-AC0009.webp",
+    "aspect": 1.5678524374176548
+  },
+  "captain:AC0017": {
+    "id": "AC0017",
+    "type": "captain",
+    "name": "Alliance Romulan Captain",
+    "face": "https://steamusercontent-a.akamaihd.net/ugc/2071149263383905017/55785024C347AF618979A4F187AC2D1E0984137C/",
+    "back": "https://i.imgur.com/21bhPTi.jpg",
+    "width": 1,
+    "height": 1,
+    "index": 0,
+    "ttsCardId": null,
+    "assetSheet": null,
+    "objectKind": "alliance-captain",
+    "objectScale": {
+      "x": 1.6422503,
+      "y": 1,
+      "z": 1.6422503
+    },
+    "localImage": "cards/captain/captain-AC0017.webp",
+    "aspect": 1.5678524374176548
+  },
   "admiral:A044": {
     "id": "A044",
     "type": "admiral",

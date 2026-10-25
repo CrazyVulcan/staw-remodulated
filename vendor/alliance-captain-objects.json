@@ -1,0 +1,170 @@
+{
+  "AC0001": {
+    "Name": "Custom_Tile",
+    "Transform": {
+      "posX": 0,
+      "posY": 1.2,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 0,
+      "scaleX": 1.6422503,
+      "scaleY": 1,
+      "scaleZ": 1.6422503
+    },
+    "Nickname": "Alliance Captain",
+    "Description": "Alliance captain XP card. Edit the name and XP tracks here; the ship tracker follows the name and skill.",
+    "GMNotes": "",
+    "AltLookAngle": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "ColorDiffuse": {
+      "r": 1,
+      "g": 1,
+      "b": 1
+    },
+    "LayoutGroupSortIndex": 0,
+    "Value": 0,
+    "Locked": false,
+    "Grid": true,
+    "Snap": true,
+    "IgnoreFoW": false,
+    "MeasureMovement": false,
+    "DragSelectable": true,
+    "Autoraise": true,
+    "Sticky": true,
+    "Tooltip": false,
+    "GridProjection": false,
+    "HideWhenFaceDown": false,
+    "Hands": false,
+    "CustomImage": {
+      "ImageURL": "https://steamusercontent-a.akamaihd.net/ugc/1758061184414041256/19386A77E4383092089749DC0945B1ADCA319A96/",
+      "ImageSecondaryURL": "",
+      "ImageScalar": 1,
+      "WidthScale": 0,
+      "CustomTile": {
+        "Type": 0,
+        "Thickness": 0.2,
+        "Stackable": false,
+        "Stretch": true
+      }
+    },
+    "LuaScript": "-- Point-board state v2. Descriptions remain user-editable; state is stored as JSON.\nlocal boardSaved = nil\nlocal limits = {Elite=6,Skill=14,Crew=10,Weapon=10,Tech=10}\nlocal slotIndex = {None=0,Crew=1,Weapon=2,Tech=3}\nlocal categories = {\"Elite\",\"Skill\",\"Crew\",\"Weapon\",\"Tech\"}\nlocal positions = {\n    Elite={\"114 -55 -2\",\"114 -55 -22\",\"46 -55 -22\",\"26 -55 -22\",\"-60 -55 -22\",\"-78 -55 -22\",\"-96 -55 -22\"},\n    Skill={114,96,78,61,46,28,9,-9,-27,-45,-60,-78,-96,-114,-132,-141},\n    Crew={104,82,58,33,8,-14,-40,-62,-85,-110,-134},\n    Weapon={104,82,58,33,8,-14,-40,-62,-85,-110,-134},\n    Tech={104,82,58,33,8,-14,-40,-62,-85,-110,-134}\n}\nlocal marker = {Elite=\"E0\",Skill=\"S0\",Crew=\"C0\",Weapon=\"W0\",Tech=\"T0\"}\nlocal row = {Skill=-30,Crew=32,Weapon=58,Tech=83}\nExpansionOne, ExpansionTwo = \"None\", \"None\"\ntotalPoints = 0\n\nlocal function bounded(value, maximum)\n    local number=tonumber(value)\n    if not number or number~=number or number==math.huge or number==-math.huge then return 0 end\n    return math.max(0,math.min(maximum,math.floor(number)))\nend\nlocal function decode(saved)\n    if type(saved)~=\"string\" or saved==\"\" then return nil end\n    local ok,value=pcall(JSON.decode,saved)\n    if ok and type(value)==\"table\" and value.version==2 then return value end\n    return nil\nend\nlocal function legacyState()\n    local text=self.getDescription() or \"\"\n    -- Read the last five fields so legacy names may contain commas or be empty.\n    local name,e,s,c,w,t=text:match(\"^(.*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)$\")\n    return {name=name or self.getName() or \"Name\",Elite=e,Skill=s,Crew=c,Weapon=w,Tech=t}\nend\nlocal function render()\n    totalPoints=0\n    for _,category in ipairs(categories) do\n        local value=bounded(_G[category..\"Points\"],limits[category])\n        _G[category..\"Points\"]=value\n        totalPoints=totalPoints+value\n        local position=positions[category][value+1]\n        if category~=\"Elite\" then position=tostring(position)..\" \"..row[category]..\" -22\" end\n        self.UI.setAttribute(marker[category],\"position\",position)\n    end\n    self.UI.setAttribute(\"Name\",\"text\",self.getName())\n    self.UI.setAttribute(\"Cost\",\"text\",tostring(totalPoints))\n    self.UI.setAttribute(\"ExpansionOne\",\"value\",tostring(slotIndex[ExpansionOne] or 0))\n    self.UI.setAttribute(\"ExpansionTwo\",\"value\",tostring(slotIndex[ExpansionTwo] or 0))\nend\nfunction SaveState()\n    local state={version=2,name=self.getName(),ExpansionOne=ExpansionOne,ExpansionTwo=ExpansionTwo,memory=memory}\n    for _,category in ipairs(categories) do state[category]=bounded(_G[category..\"Points\"],limits[category]) end\n    boardSaved=JSON.encode(state)\n    self.script_state=boardSaved\n    if STA2E_CaptainNotify then STA2E_CaptainNotify() end\n    return boardSaved\nend\nfunction LoadState()\n    local state=decode(boardSaved) or legacyState()\n    memory=type(state.memory)==\"table\" and state.memory or {}\n    self.setName(type(state.name)==\"string\" and state.name or \"Name\")\n    for _,category in ipairs(categories) do _G[category..\"Points\"]=bounded(state[category],limits[category]) end\n    ExpansionOne=slotIndex[state.ExpansionOne] and state.ExpansionOne or \"None\"\n    ExpansionTwo=slotIndex[state.ExpansionTwo] and state.ExpansionTwo or \"None\"\n    render()\n    SaveState()\nend\nfunction onLoad(saved)\n    boardSaved=saved\n    self.clearContextMenu()\n    self.addContextMenuItem(\"Load\",LoadState)\n    LoadState()\nend\nfunction onSave() return SaveState() end\nfunction nameUpdate(player,value)\n    self.setName(tostring(value or \"\"))\n    render(); SaveState()\nend\nlocal function adjust(category,amount)\n    _G[category..\"Points\"]=bounded((_G[category..\"Points\"] or 0)+amount,limits[category])\n    render(); SaveState()\nend\nfunction EliteUp() adjust(\"Elite\",1) end\nfunction EliteDown() adjust(\"Elite\",-1) end\nfunction SkillUp() adjust(\"Skill\",1) end\nfunction SkillDown() adjust(\"Skill\",-1) end\nfunction CrewUp() adjust(\"Crew\",1) end\nfunction CrewDown() adjust(\"Crew\",-1) end\nfunction WeaponUp() adjust(\"Weapon\",1) end\nfunction WeaponDown() adjust(\"Weapon\",-1) end\nfunction TechUp() adjust(\"Tech\",1) end\nfunction TechDown() adjust(\"Tech\",-1) end\n-- Expansion controls record the two additional slot types; they do not alter costs.\nfunction option1Selected(player,value)\n    if slotIndex[value]==nil then return end\n    ExpansionOne=value; render(); SaveState()\nend\nfunction option2Selected(player,value)\n    if slotIndex[value]==nil then return end\n    ExpansionTwo=value; render(); SaveState()\nend\n\n-- Keep the original point board's UI, track limits, and v2 state format.\n-- Add ship association and a read-only snapshot for Remodulated's tracker.\nmemory={}\nlocal captainObservedName=nil\nlocal captainNextNameCheck=0\nfunction STA2E_CaptainSnapshot()\n    local state={name=self.getName(),skill=2+math.floor(bounded(SkillPoints,limits.Skill)/2),xp=0,tracks={},ExpansionOne=ExpansionOne,ExpansionTwo=ExpansionTwo}\n    for _,category in ipairs(categories) do\n        state.tracks[category]=bounded(_G[category..\"Points\"],limits[category])\n        state.xp=state.xp+state.tracks[category]\n    end\n    return state\nend\nfunction STA2E_SetMemory(value)\n    memory=value or {}\n    SaveState()\nend\nfunction STA2E_CaptainNotify()\n    captainObservedName=self.getName()\n    self.value=totalPoints\n    if memory.instanceId and memory.role==\"upgrade\" then\n        pcall(function() Global.call(\"STA2E_AllianceCaptainChanged\",{object=self,snapshot=STA2E_CaptainSnapshot()}) end)\n    end\nend\nfunction onUpdate()\n    if Time.time<captainNextNameCheck then return end\n    captainNextNameCheck=Time.time+0.5\n    if captainObservedName~=self.getName() then render();SaveState() end\nend\n",
+    "LuaScriptState": "{\"version\":2,\"name\":\"Alliance Captain\",\"Elite\":0,\"Skill\":0,\"Crew\":0,\"Weapon\":0,\"Tech\":0,\"ExpansionOne\":\"None\",\"ExpansionTwo\":\"None\"}",
+    "XmlUI": "<Text id=\"Cost\" text=\"0\" fontSize=\"32\" fontStyle=\"Bold\" scale=\"0.7\" position=\"-140 -80 -22\" rotation=\"0 0 180\"></Text>\n<InputField id=\"Name\" onEndEdit=\"nameUpdate\" width=\"300\" scale=\".65\" fontStyle=\"Bold\" rotation=\"0 0 180\" Position=\"-30 -80 -22\"></InputField>\n\n<Button onClick=\"EliteDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 -55 -22\">-</Button>\r\n<Button onClick=\"EliteUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 -55 -22\">+</Button>\r\n\n<Button onClick=\"SkillDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 -30 -22\">-</Button>\r\n<Button onClick=\"SkillUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 -30 -22\">+</Button>\r\n\n<Button onClick=\"CrewDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 35 -22\">-</Button>\r\n<Button onClick=\"CrewUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 35 -22\">+</Button>\r\n\n<Button onClick=\"WeaponDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 58 -22\">-</Button>\r\n<Button onClick=\"WeaponUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 58 -22\">+</Button>\r\n\n<Button onClick=\"TechDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 83 -22\">-</Button>\r\n<Button onClick=\"TechUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 83 -22\">+</Button>\r\n\n<Image id=\"C0\" position=\"104 32 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n<Image id=\"W0\" position=\"104 58 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n<Image id=\"T0\" position=\"104 82 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Image id=\"S0\" position=\"114 -30 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Image id=\"E0\" position=\"114 -55 -2\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Dropdown scale=\".75\" id=\"ExpansionOne\" position=\"50 -5 -22\" width=\"100\"  rotation=\"0 0 180\" onValueChanged=\"option1Selected\">\r\n    <Option textRotation=\"0 0 180\" selected=\"true\">None</Option>\r\n    <Option TextRotation=\"0 0 180\" >Crew</Option>\r\n    <Option rotation=\"0 0 180\" >Weapon</Option>\r\n    <Option rotation=\"0 0 180\" >Tech</Option>\r\n</Dropdown>\n\n<Dropdown scale=\".75\" id=\"ExpansionTwo\" position=\"-73 -5 -22\" width=\"100\"  rotation=\"0 0 180\" onValueChanged=\"option2Selected\">\r\n    <Option textRotation=\"0 0 180\" selected=\"true\">None</Option>\r\n    <Option TextRotation=\"0 0 180\" >Crew</Option>\r\n    <Option rotation=\"0 0 180\" >Weapon</Option>\r\n    <Option rotation=\"0 0 180\" >Tech</Option>\r\n</Dropdown>"
+  },
+  "AC0009": {
+    "Name": "Custom_Tile",
+    "Transform": {
+      "posX": 0,
+      "posY": 1.2,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 0,
+      "scaleX": 1.6422503,
+      "scaleY": 1,
+      "scaleZ": 1.6422503
+    },
+    "Nickname": "Alliance Captain",
+    "Description": "Alliance captain XP card. Edit the name and XP tracks here; the ship tracker follows the name and skill.",
+    "GMNotes": "",
+    "AltLookAngle": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "ColorDiffuse": {
+      "r": 1,
+      "g": 1,
+      "b": 1
+    },
+    "LayoutGroupSortIndex": 0,
+    "Value": 0,
+    "Locked": false,
+    "Grid": true,
+    "Snap": true,
+    "IgnoreFoW": false,
+    "MeasureMovement": false,
+    "DragSelectable": true,
+    "Autoraise": true,
+    "Sticky": true,
+    "Tooltip": false,
+    "GridProjection": false,
+    "HideWhenFaceDown": false,
+    "Hands": false,
+    "CustomImage": {
+      "ImageURL": "https://steamusercontent-a.akamaihd.net/ugc/2001325032159922848/7215412F5C9A22F32305511A27E5920FCD91B937/",
+      "ImageSecondaryURL": "",
+      "ImageScalar": 1,
+      "WidthScale": 0,
+      "CustomTile": {
+        "Type": 0,
+        "Thickness": 0.2,
+        "Stackable": false,
+        "Stretch": true
+      }
+    },
+    "LuaScript": "-- Point-board state v2. Descriptions remain user-editable; state is stored as JSON.\nlocal boardSaved = nil\nlocal limits = {Elite=6,Skill=14,Crew=10,Weapon=10,Tech=10}\nlocal slotIndex = {None=0,Crew=1,Weapon=2,Tech=3}\nlocal categories = {\"Elite\",\"Skill\",\"Crew\",\"Weapon\",\"Tech\"}\nlocal positions = {\n    Elite={\"114 -55 -2\",\"114 -55 -22\",\"46 -55 -22\",\"26 -55 -22\",\"-60 -55 -22\",\"-78 -55 -22\",\"-96 -55 -22\"},\n    Skill={114,96,78,61,46,28,9,-9,-27,-45,-60,-78,-96,-114,-132,-141},\n    Crew={104,82,58,33,8,-14,-40,-62,-85,-110,-134},\n    Weapon={104,82,58,33,8,-14,-40,-62,-85,-110,-134},\n    Tech={104,82,58,33,8,-14,-40,-62,-85,-110,-134}\n}\nlocal marker = {Elite=\"E0\",Skill=\"S0\",Crew=\"C0\",Weapon=\"W0\",Tech=\"T0\"}\nlocal row = {Skill=-30,Crew=32,Weapon=58,Tech=83}\nExpansionOne, ExpansionTwo = \"None\", \"None\"\ntotalPoints = 0\n\nlocal function bounded(value, maximum)\n    local number=tonumber(value)\n    if not number or number~=number or number==math.huge or number==-math.huge then return 0 end\n    return math.max(0,math.min(maximum,math.floor(number)))\nend\nlocal function decode(saved)\n    if type(saved)~=\"string\" or saved==\"\" then return nil end\n    local ok,value=pcall(JSON.decode,saved)\n    if ok and type(value)==\"table\" and value.version==2 then return value end\n    return nil\nend\nlocal function legacyState()\n    local text=self.getDescription() or \"\"\n    -- Read the last five fields so legacy names may contain commas or be empty.\n    local name,e,s,c,w,t=text:match(\"^(.*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)$\")\n    return {name=name or self.getName() or \"Name\",Elite=e,Skill=s,Crew=c,Weapon=w,Tech=t}\nend\nlocal function render()\n    totalPoints=0\n    for _,category in ipairs(categories) do\n        local value=bounded(_G[category..\"Points\"],limits[category])\n        _G[category..\"Points\"]=value\n        totalPoints=totalPoints+value\n        local position=positions[category][value+1]\n        if category~=\"Elite\" then position=tostring(position)..\" \"..row[category]..\" -22\" end\n        self.UI.setAttribute(marker[category],\"position\",position)\n    end\n    self.UI.setAttribute(\"Name\",\"text\",self.getName())\n    self.UI.setAttribute(\"Cost\",\"text\",tostring(totalPoints))\n    self.UI.setAttribute(\"ExpansionOne\",\"value\",tostring(slotIndex[ExpansionOne] or 0))\n    self.UI.setAttribute(\"ExpansionTwo\",\"value\",tostring(slotIndex[ExpansionTwo] or 0))\nend\nfunction SaveState()\n    local state={version=2,name=self.getName(),ExpansionOne=ExpansionOne,ExpansionTwo=ExpansionTwo,memory=memory}\n    for _,category in ipairs(categories) do state[category]=bounded(_G[category..\"Points\"],limits[category]) end\n    boardSaved=JSON.encode(state)\n    self.script_state=boardSaved\n    if STA2E_CaptainNotify then STA2E_CaptainNotify() end\n    return boardSaved\nend\nfunction LoadState()\n    local state=decode(boardSaved) or legacyState()\n    memory=type(state.memory)==\"table\" and state.memory or {}\n    self.setName(type(state.name)==\"string\" and state.name or \"Name\")\n    for _,category in ipairs(categories) do _G[category..\"Points\"]=bounded(state[category],limits[category]) end\n    ExpansionOne=slotIndex[state.ExpansionOne] and state.ExpansionOne or \"None\"\n    ExpansionTwo=slotIndex[state.ExpansionTwo] and state.ExpansionTwo or \"None\"\n    render()\n    SaveState()\nend\nfunction onLoad(saved)\n    boardSaved=saved\n    self.clearContextMenu()\n    self.addContextMenuItem(\"Load\",LoadState)\n    LoadState()\nend\nfunction onSave() return SaveState() end\nfunction nameUpdate(player,value)\n    self.setName(tostring(value or \"\"))\n    render(); SaveState()\nend\nlocal function adjust(category,amount)\n    _G[category..\"Points\"]=bounded((_G[category..\"Points\"] or 0)+amount,limits[category])\n    render(); SaveState()\nend\nfunction EliteUp() adjust(\"Elite\",1) end\nfunction EliteDown() adjust(\"Elite\",-1) end\nfunction SkillUp() adjust(\"Skill\",1) end\nfunction SkillDown() adjust(\"Skill\",-1) end\nfunction CrewUp() adjust(\"Crew\",1) end\nfunction CrewDown() adjust(\"Crew\",-1) end\nfunction WeaponUp() adjust(\"Weapon\",1) end\nfunction WeaponDown() adjust(\"Weapon\",-1) end\nfunction TechUp() adjust(\"Tech\",1) end\nfunction TechDown() adjust(\"Tech\",-1) end\n-- Expansion controls record the two additional slot types; they do not alter costs.\nfunction option1Selected(player,value)\n    if slotIndex[value]==nil then return end\n    ExpansionOne=value; render(); SaveState()\nend\nfunction option2Selected(player,value)\n    if slotIndex[value]==nil then return end\n    ExpansionTwo=value; render(); SaveState()\nend\n\n-- Keep the original point board's UI, track limits, and v2 state format.\n-- Add ship association and a read-only snapshot for Remodulated's tracker.\nmemory={}\nlocal captainObservedName=nil\nlocal captainNextNameCheck=0\nfunction STA2E_CaptainSnapshot()\n    local state={name=self.getName(),skill=2+math.floor(bounded(SkillPoints,limits.Skill)/2),xp=0,tracks={},ExpansionOne=ExpansionOne,ExpansionTwo=ExpansionTwo}\n    for _,category in ipairs(categories) do\n        state.tracks[category]=bounded(_G[category..\"Points\"],limits[category])\n        state.xp=state.xp+state.tracks[category]\n    end\n    return state\nend\nfunction STA2E_SetMemory(value)\n    memory=value or {}\n    SaveState()\nend\nfunction STA2E_CaptainNotify()\n    captainObservedName=self.getName()\n    self.value=totalPoints\n    if memory.instanceId and memory.role==\"upgrade\" then\n        pcall(function() Global.call(\"STA2E_AllianceCaptainChanged\",{object=self,snapshot=STA2E_CaptainSnapshot()}) end)\n    end\nend\nfunction onUpdate()\n    if Time.time<captainNextNameCheck then return end\n    captainNextNameCheck=Time.time+0.5\n    if captainObservedName~=self.getName() then render();SaveState() end\nend\n",
+    "LuaScriptState": "{\"version\":2,\"name\":\"Alliance Captain\",\"Elite\":0,\"Skill\":0,\"Crew\":0,\"Weapon\":0,\"Tech\":0,\"ExpansionOne\":\"None\",\"ExpansionTwo\":\"None\"}",
+    "XmlUI": "<Text id=\"Cost\" text=\"0\" fontSize=\"32\" fontStyle=\"Bold\" scale=\"0.7\" position=\"-140 -80 -22\" rotation=\"0 0 180\"></Text>\n<InputField id=\"Name\" onEndEdit=\"nameUpdate\" width=\"300\" scale=\".65\" fontStyle=\"Bold\" rotation=\"0 0 180\" Position=\"-30 -80 -22\"></InputField>\n\n<Button onClick=\"EliteDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 -55 -22\">-</Button>\r\n<Button onClick=\"EliteUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 -55 -22\">+</Button>\r\n\n<Button onClick=\"SkillDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 -30 -22\">-</Button>\r\n<Button onClick=\"SkillUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 -30 -22\">+</Button>\r\n\n<Button onClick=\"CrewDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 35 -22\">-</Button>\r\n<Button onClick=\"CrewUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 35 -22\">+</Button>\r\n\n<Button onClick=\"WeaponDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 58 -22\">-</Button>\r\n<Button onClick=\"WeaponUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 58 -22\">+</Button>\r\n\n<Button onClick=\"TechDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 83 -22\">-</Button>\r\n<Button onClick=\"TechUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 83 -22\">+</Button>\r\n\n<Image id=\"C0\" position=\"104 32 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n<Image id=\"W0\" position=\"104 58 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n<Image id=\"T0\" position=\"104 82 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Image id=\"S0\" position=\"114 -30 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Image id=\"E0\" position=\"114 -55 -2\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Dropdown scale=\".75\" id=\"ExpansionOne\" position=\"50 -5 -22\" width=\"100\"  rotation=\"0 0 180\" onValueChanged=\"option1Selected\">\r\n    <Option textRotation=\"0 0 180\" selected=\"true\">None</Option>\r\n    <Option TextRotation=\"0 0 180\" >Crew</Option>\r\n    <Option rotation=\"0 0 180\" >Weapon</Option>\r\n    <Option rotation=\"0 0 180\" >Tech</Option>\r\n</Dropdown>\n\n<Dropdown scale=\".75\" id=\"ExpansionTwo\" position=\"-73 -5 -22\" width=\"100\"  rotation=\"0 0 180\" onValueChanged=\"option2Selected\">\r\n    <Option textRotation=\"0 0 180\" selected=\"true\">None</Option>\r\n    <Option TextRotation=\"0 0 180\" >Crew</Option>\r\n    <Option rotation=\"0 0 180\" >Weapon</Option>\r\n    <Option rotation=\"0 0 180\" >Tech</Option>\r\n</Dropdown>"
+  },
+  "AC0017": {
+    "Name": "Custom_Tile",
+    "Transform": {
+      "posX": 0,
+      "posY": 1.2,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 0,
+      "scaleX": 1.6422503,
+      "scaleY": 1,
+      "scaleZ": 1.6422503
+    },
+    "Nickname": "Alliance Captain",
+    "Description": "Alliance captain XP card. Edit the name and XP tracks here; the ship tracker follows the name and skill.",
+    "GMNotes": "",
+    "AltLookAngle": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "ColorDiffuse": {
+      "r": 1,
+      "g": 1,
+      "b": 1
+    },
+    "LayoutGroupSortIndex": 0,
+    "Value": 0,
+    "Locked": false,
+    "Grid": true,
+    "Snap": true,
+    "IgnoreFoW": false,
+    "MeasureMovement": false,
+    "DragSelectable": true,
+    "Autoraise": true,
+    "Sticky": true,
+    "Tooltip": false,
+    "GridProjection": false,
+    "HideWhenFaceDown": false,
+    "Hands": false,
+    "CustomImage": {
+      "ImageURL": "https://steamusercontent-a.akamaihd.net/ugc/2071149263383905017/55785024C347AF618979A4F187AC2D1E0984137C/",
+      "ImageSecondaryURL": "",
+      "ImageScalar": 1,
+      "WidthScale": 0,
+      "CustomTile": {
+        "Type": 0,
+        "Thickness": 0.2,
+        "Stackable": false,
+        "Stretch": true
+      }
+    },
+    "LuaScript": "-- Point-board state v2. Descriptions remain user-editable; state is stored as JSON.\nlocal boardSaved = nil\nlocal limits = {Elite=6,Skill=14,Crew=10,Weapon=10,Tech=10}\nlocal slotIndex = {None=0,Crew=1,Weapon=2,Tech=3}\nlocal categories = {\"Elite\",\"Skill\",\"Crew\",\"Weapon\",\"Tech\"}\nlocal positions = {\n    Elite={\"114 -55 -2\",\"114 -55 -22\",\"46 -55 -22\",\"26 -55 -22\",\"-60 -55 -22\",\"-78 -55 -22\",\"-96 -55 -22\"},\n    Skill={114,96,78,61,46,28,9,-9,-27,-45,-60,-78,-96,-114,-132,-141},\n    Crew={104,82,58,33,8,-14,-40,-62,-85,-110,-134},\n    Weapon={104,82,58,33,8,-14,-40,-62,-85,-110,-134},\n    Tech={104,82,58,33,8,-14,-40,-62,-85,-110,-134}\n}\nlocal marker = {Elite=\"E0\",Skill=\"S0\",Crew=\"C0\",Weapon=\"W0\",Tech=\"T0\"}\nlocal row = {Skill=-30,Crew=32,Weapon=58,Tech=83}\nExpansionOne, ExpansionTwo = \"None\", \"None\"\ntotalPoints = 0\n\nlocal function bounded(value, maximum)\n    local number=tonumber(value)\n    if not number or number~=number or number==math.huge or number==-math.huge then return 0 end\n    return math.max(0,math.min(maximum,math.floor(number)))\nend\nlocal function decode(saved)\n    if type(saved)~=\"string\" or saved==\"\" then return nil end\n    local ok,value=pcall(JSON.decode,saved)\n    if ok and type(value)==\"table\" and value.version==2 then return value end\n    return nil\nend\nlocal function legacyState()\n    local text=self.getDescription() or \"\"\n    -- Read the last five fields so legacy names may contain commas or be empty.\n    local name,e,s,c,w,t=text:match(\"^(.*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)$\")\n    return {name=name or self.getName() or \"Name\",Elite=e,Skill=s,Crew=c,Weapon=w,Tech=t}\nend\nlocal function render()\n    totalPoints=0\n    for _,category in ipairs(categories) do\n        local value=bounded(_G[category..\"Points\"],limits[category])\n        _G[category..\"Points\"]=value\n        totalPoints=totalPoints+value\n        local position=positions[category][value+1]\n        if category~=\"Elite\" then position=tostring(position)..\" \"..row[category]..\" -22\" end\n        self.UI.setAttribute(marker[category],\"position\",position)\n    end\n    self.UI.setAttribute(\"Name\",\"text\",self.getName())\n    self.UI.setAttribute(\"Cost\",\"text\",tostring(totalPoints))\n    self.UI.setAttribute(\"ExpansionOne\",\"value\",tostring(slotIndex[ExpansionOne] or 0))\n    self.UI.setAttribute(\"ExpansionTwo\",\"value\",tostring(slotIndex[ExpansionTwo] or 0))\nend\nfunction SaveState()\n    local state={version=2,name=self.getName(),ExpansionOne=ExpansionOne,ExpansionTwo=ExpansionTwo,memory=memory}\n    for _,category in ipairs(categories) do state[category]=bounded(_G[category..\"Points\"],limits[category]) end\n    boardSaved=JSON.encode(state)\n    self.script_state=boardSaved\n    if STA2E_CaptainNotify then STA2E_CaptainNotify() end\n    return boardSaved\nend\nfunction LoadState()\n    local state=decode(boardSaved) or legacyState()\n    memory=type(state.memory)==\"table\" and state.memory or {}\n    self.setName(type(state.name)==\"string\" and state.name or \"Name\")\n    for _,category in ipairs(categories) do _G[category..\"Points\"]=bounded(state[category],limits[category]) end\n    ExpansionOne=slotIndex[state.ExpansionOne] and state.ExpansionOne or \"None\"\n    ExpansionTwo=slotIndex[state.ExpansionTwo] and state.ExpansionTwo or \"None\"\n    render()\n    SaveState()\nend\nfunction onLoad(saved)\n    boardSaved=saved\n    self.clearContextMenu()\n    self.addContextMenuItem(\"Load\",LoadState)\n    LoadState()\nend\nfunction onSave() return SaveState() end\nfunction nameUpdate(player,value)\n    self.setName(tostring(value or \"\"))\n    render(); SaveState()\nend\nlocal function adjust(category,amount)\n    _G[category..\"Points\"]=bounded((_G[category..\"Points\"] or 0)+amount,limits[category])\n    render(); SaveState()\nend\nfunction EliteUp() adjust(\"Elite\",1) end\nfunction EliteDown() adjust(\"Elite\",-1) end\nfunction SkillUp() adjust(\"Skill\",1) end\nfunction SkillDown() adjust(\"Skill\",-1) end\nfunction CrewUp() adjust(\"Crew\",1) end\nfunction CrewDown() adjust(\"Crew\",-1) end\nfunction WeaponUp() adjust(\"Weapon\",1) end\nfunction WeaponDown() adjust(\"Weapon\",-1) end\nfunction TechUp() adjust(\"Tech\",1) end\nfunction TechDown() adjust(\"Tech\",-1) end\n-- Expansion controls record the two additional slot types; they do not alter costs.\nfunction option1Selected(player,value)\n    if slotIndex[value]==nil then return end\n    ExpansionOne=value; render(); SaveState()\nend\nfunction option2Selected(player,value)\n    if slotIndex[value]==nil then return end\n    ExpansionTwo=value; render(); SaveState()\nend\n\n-- Keep the original point board's UI, track limits, and v2 state format.\n-- Add ship association and a read-only snapshot for Remodulated's tracker.\nmemory={}\nlocal captainObservedName=nil\nlocal captainNextNameCheck=0\nfunction STA2E_CaptainSnapshot()\n    local state={name=self.getName(),skill=2+math.floor(bounded(SkillPoints,limits.Skill)/2),xp=0,tracks={},ExpansionOne=ExpansionOne,ExpansionTwo=ExpansionTwo}\n    for _,category in ipairs(categories) do\n        state.tracks[category]=bounded(_G[category..\"Points\"],limits[category])\n        state.xp=state.xp+state.tracks[category]\n    end\n    return state\nend\nfunction STA2E_SetMemory(value)\n    memory=value or {}\n    SaveState()\nend\nfunction STA2E_CaptainNotify()\n    captainObservedName=self.getName()\n    self.value=totalPoints\n    if memory.instanceId and memory.role==\"upgrade\" then\n        pcall(function() Global.call(\"STA2E_AllianceCaptainChanged\",{object=self,snapshot=STA2E_CaptainSnapshot()}) end)\n    end\nend\nfunction onUpdate()\n    if Time.time<captainNextNameCheck then return end\n    captainNextNameCheck=Time.time+0.5\n    if captainObservedName~=self.getName() then render();SaveState() end\nend\n",
+    "LuaScriptState": "{\"version\":2,\"name\":\"Alliance Captain\",\"Elite\":0,\"Skill\":0,\"Crew\":0,\"Weapon\":0,\"Tech\":0,\"ExpansionOne\":\"None\",\"ExpansionTwo\":\"None\"}",
+    "XmlUI": "<Text id=\"Cost\" text=\"0\" fontSize=\"32\" fontStyle=\"Bold\" scale=\"0.7\" position=\"-140 -80 -22\" rotation=\"0 0 180\"></Text>\n<InputField id=\"Name\" onEndEdit=\"nameUpdate\" width=\"300\" scale=\".65\" fontStyle=\"Bold\" rotation=\"0 0 180\" Position=\"-30 -80 -22\"></InputField>\n\n<Button onClick=\"EliteDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 -55 -22\">-</Button>\r\n<Button onClick=\"EliteUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 -55 -22\">+</Button>\r\n\n<Button onClick=\"SkillDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 -30 -22\">-</Button>\r\n<Button onClick=\"SkillUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 -30 -22\">+</Button>\r\n\n<Button onClick=\"CrewDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 35 -22\">-</Button>\r\n<Button onClick=\"CrewUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 35 -22\">+</Button>\r\n\n<Button onClick=\"WeaponDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 58 -22\">-</Button>\r\n<Button onClick=\"WeaponUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 58 -22\">+</Button>\r\n\n<Button onClick=\"TechDown\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"150 83 -22\">-</Button>\r\n<Button onClick=\"TechUp\" iconWidth=\"12\"  width=\"18\" height=\"25\" position=\"-150 83 -22\">+</Button>\r\n\n<Image id=\"C0\" position=\"104 32 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n<Image id=\"W0\" position=\"104 58 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n<Image id=\"T0\" position=\"104 82 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Image id=\"S0\" position=\"114 -30 -22\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Image id=\"E0\" position=\"114 -55 -2\" color=\"#1E87CC88\" width=\"18\" height=\"25\"></Image>\n\n<Dropdown scale=\".75\" id=\"ExpansionOne\" position=\"50 -5 -22\" width=\"100\"  rotation=\"0 0 180\" onValueChanged=\"option1Selected\">\r\n    <Option textRotation=\"0 0 180\" selected=\"true\">None</Option>\r\n    <Option TextRotation=\"0 0 180\" >Crew</Option>\r\n    <Option rotation=\"0 0 180\" >Weapon</Option>\r\n    <Option rotation=\"0 0 180\" >Tech</Option>\r\n</Dropdown>\n\n<Dropdown scale=\".75\" id=\"ExpansionTwo\" position=\"-73 -5 -22\" width=\"100\"  rotation=\"0 0 180\" onValueChanged=\"option2Selected\">\r\n    <Option textRotation=\"0 0 180\" selected=\"true\">None</Option>\r\n    <Option TextRotation=\"0 0 180\" >Crew</Option>\r\n    <Option rotation=\"0 0 180\" >Weapon</Option>\r\n    <Option rotation=\"0 0 180\" >Tech</Option>\r\n</Dropdown>"
+  }
+}

@@ -2,18 +2,22 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const root=p.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(p.join(root,file),'utf8');
 
-test('Root GitHub Pages entry point uses existing app with public asset paths',async()=>{
- const html=read('index.html'),css=read('style.css'),utopia=read('public/vendor/utopia.js');
- for(const file of ['index.html','style.css','src/core.js','src/rules.js','src/app.js','public/css/font-staw.css','public/vendor/jquery.js','public/data/card-costs.json']){
+test('Landing page links to isolated STAW and M5 builders using one shared engine',async()=>{
+ const html=read('index.html'),staw=read('staw/index.html'),m5=read('m5/index.html'),css=read('style.css'),utopia=read('public/vendor/utopia.js');
+ for(const file of ['index.html','landing.css','staw/index.html','m5/index.html','style.css','src/core.js','src/rules.js','src/app.js','public/css/font-staw.css','public/vendor/jquery.js','public/data/card-costs.json','public/data/m5/data.json','public/data/m5/card-costs.json','public/data/m5/tts-routes.json','public/m5/klingon/klingon-ships-v3.2.png','public/m5/klingon/klingon-deck-v3.2.png','public/m5/klingon/klingon-deck-back.png']){
   assert.ok(fs.existsSync(p.join(root,file)),file);
  }
  assert.match(read('src/app.js'),/data-maneuver/);
- assert.match(html,/window\.RemodulatedConfig=\{assetBase:'public'\}/);
- assert.match(html,/data-asset-path="data\/card-costs\.json"/);
- assert.match(html,/href="public\/css\/font-staw\.css"/);
- assert.match(html,/src="src\/app\.js"/);
- assert.doesNotMatch(html,/id="cost-editor"/);
- assert.match(utopia,/remodulatedAssetPath\("data\/data\.json"\)/);
+ assert.match(html,/href="staw\/"/);assert.match(html,/href="m5\/"/);
+ assert.match(staw,/gameId:'staw'/);assert.match(m5,/gameId:'m5'/);
+ assert.match(staw,/storagePrefix:'staw-remodulated'/);assert.match(m5,/storagePrefix:'m5-remodulated'/);
+ assert.match(m5,/catalogBase:'data\/m5'/);assert.match(m5,/catalogFile:'data\/m5\/data\.json'/);
+ assert.match(staw,/src="\.\.\/src\/app\.js"/);assert.match(m5,/src="\.\.\/src\/app\.js"/);
+ assert.doesNotMatch(staw,/id="cost-editor"/);
+ assert.match(utopia,/RemodulatedConfig\.catalogFile/);
+ const m5Data=JSON.parse(read('public/data/m5/data.json')),m5Routes=JSON.parse(read('public/data/m5/tts-routes.json'));
+ assert.equal(m5Data.ships.length,6);assert.equal(m5Data.upgrades.length,26);assert.equal(Object.keys(m5Routes).length,32);
+ assert.ok(m5Data.ships.every(ship=>ship.upgrades.every(slot=>slot==='m5')));
  assert.match(css,/url\('public\/fonts\/Swiss1\.ttf'\)/);
  assert.match(css,/url\('src\/favicon\.svg'\)/);
  const server=http.createServer((req,res)=>{
@@ -29,8 +33,10 @@ test('Root GitHub Pages entry point uses existing app with public asset paths',a
  const fetchText=path=>new Promise((resolve,reject)=>http.get({host:'127.0.0.1',port,path},res=>{let body='';res.setEncoding('utf8');res.on('data',chunk=>body+=chunk);res.on('end',()=>res.statusCode===200?resolve(body):reject(Error(path+' -> '+res.statusCode)));}).on('error',reject));
  const fetchStatus=path=>new Promise((resolve,reject)=>http.get({host:'127.0.0.1',port,path},res=>{res.resume();res.on('end',()=>resolve(res.statusCode));}).on('error',reject));
  try{
-  assert.match(await fetchText('/'),/public\/css\/font-staw\.css/);
-  for(const path of ['/style.css','/src/app.js','/public/data/data.json','/public/data/card-costs.json','/public/data/maneuver-cards.json','/public/cards/ship/ship-S415.webp','/public/cards/captain/captain-Cap039.webp','/public/models/contentious-effect-token.obj']){
+  assert.match(await fetchText('/'),/Launch STAW builder/);
+  assert.match(await fetchText('/staw/index.html'),/gameId:'staw'/);
+  assert.match(await fetchText('/m5/index.html'),/gameId:'m5'/);
+  for(const path of ['/landing.css','/style.css','/src/app.js','/public/data/data.json','/public/data/card-costs.json','/public/data/maneuver-cards.json','/public/data/m5/data.json','/public/data/m5/card-costs.json','/public/data/m5/tts-routes.json','/public/m5/klingon/klingon-ships-v3.2.png','/public/m5/klingon/klingon-deck-v3.2.png','/public/m5/klingon/klingon-deck-back.png','/public/cards/ship/ship-S415.webp','/public/cards/captain/captain-Cap039.webp','/public/models/contentious-effect-token.obj']){
    assert.equal(await fetchStatus(path),200,path);
   }
  }finally{

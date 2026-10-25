@@ -4,8 +4,31 @@ const {chromium}=require(process.env.STAW_NODE_MODULES?p.join(process.env.STAW_N
  const outputDir=process.env.STAW_QA_OUTPUT||p.resolve(__dirname,'..');fs.mkdirSync(outputDir,{recursive:true});
  const browser=await chromium.launch({channel:'msedge',headless:true}),page=await browser.newPage({viewport:{width:1440,height:1000}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
- await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>!!window.STAW);
- assert.equal(await page.evaluate(()=>STAW.cards.length),2296);
+ await page.goto('http://127.0.0.1:4173/staw/');await page.waitForFunction(()=>!!window.STAW);
+ assert.equal(await page.evaluate(()=>STAW.cards.length),2299);
+ for(const [id,faction]of [['AC0001','federation'],['AC0009','klingon'],['AC0017','romulan']]){
+  await page.evaluate(()=>STAW.loadText('S274'));
+  await page.selectOption('#type','captain');await page.selectOption('#faction',faction);await page.locator('#search').fill(id);
+  assert.equal(await page.locator('.catalog-entry').count(),1);
+  assert.match(await page.locator('.catalog-entry img').getAttribute('src'),new RegExp('captain-'+id+'\\.webp$'));
+  await page.locator('[data-add="captain:'+id+'"]').click();
+  assert.equal(await page.evaluate(()=>STAW.fleet.ships[0].captain.id),id);
+  assert.equal(await page.evaluate(()=>JSON.parse(STAW.exportFleet('json')).ships[0].cards[0].cardId),id);
+  const saved=await page.evaluate(()=>JSON.stringify(STAW.saveObject()));
+  await page.evaluate(value=>STAW.loadText(value),saved);
+  assert.equal(await page.evaluate(()=>STAW.fleet.ships[0].captain.id),id);
+ }
+ await page.evaluate(()=>STAW.loadText(JSON.stringify({ships:[]})));
+ await page.selectOption('#faction','');await page.locator('#search').fill('');
+ await page.evaluate(()=>{
+  STAW.loadText('S274\nCap049');const defaults=JSON.parse(JSON.stringify(STAW.saveObject().costProfile)),saved=STAW.saveObject();
+  saved.costProfile=saved.costProfile.filter(row=>!['AC0001','AC0009','AC0017'].includes(row.id));
+  saved.costProfile.find(row=>row.id==='S274').spudsCost=17;
+  STAW.loadText(JSON.stringify(saved));
+  if(STAW.fleet.ships[0].captain.id!=='Cap049'||STAW.saveObject().costProfile.find(row=>row.id==='S274').spudsCost!==17)throw Error('Previous catalog fleet did not migrate');
+  STAW.loadText(JSON.stringify({ships:[],costProfile:defaults}));
+ });
+ await page.evaluate(()=>STAW.loadText(JSON.stringify({ships:[]})));
  assert.equal(await page.locator('#cost-editor').count(),0);
  await page.selectOption('#type','captain');await page.locator('#search').fill('Cap039');
  assert.equal(await page.locator('.catalog-entry').count(),1);
@@ -49,7 +72,14 @@ const {chromium}=require(process.env.STAW_NODE_MODULES?p.join(process.env.STAW_N
  await page.evaluate(()=>STAW.loadText('S199'));
  await page.locator('#export').click();assert.match(await page.locator('#modal-content').textContent(),/no verified route/);await page.locator('#close-modal').click();
  await page.evaluate(()=>STAW.loadText('S274\nCap049\nC441'));
- assert.deepEqual(errors,[]);
- console.log('Browser QA passed: load, search, equip, uniqueness, totals, faction penalty, face-value SPUDS mode, resources, persistence, rollback, exports, missing routes, mobile layout.');
+ const m5=await browser.newPage({viewport:{width:1280,height:800}});const m5Errors=[];m5.on('pageerror',e=>m5Errors.push(e.message));await m5.goto('http://127.0.0.1:4173/m5/');await m5.evaluate(()=>localStorage.removeItem('m5-remodulated-fleet'));await m5.reload();await m5.waitForFunction(()=>!!window.M5);
+ assert.equal(await m5.evaluate(()=>M5.gameId),'m5');assert.equal(await m5.evaluate(()=>M5.cards.length),32);assert.equal(await m5.evaluate(()=>M5.saveObject().format),'m5-remodulated');
+ assert.deepEqual(await m5.evaluate(()=>M5.cards.filter(c=>c.type==='ship').map(c=>c.name)),["K'Vort","Vor'Cha","Negh'Var",'D7 Cruiser',"B'Rel","K'T'inga"]);
+ await m5.locator('[data-add="ship:M5-K-S01"]').click();assert.equal(await m5.locator('#total').textContent(),'4');
+ await m5.locator('[data-slot="0"]').click();await m5.locator('#search').fill('M5-K-001');await m5.locator('[data-add="m5:M5-K-001"]').click();assert.equal(await m5.locator('#total').textContent(),'6');
+ assert.match(await m5.locator('.fleet-card .card-image').first().getAttribute('style'),/klingon-ships-v3\.2\.png/);
+ assert.equal(await m5.evaluate(()=>M5.exportFleet('text').startsWith('M5-K-S01\nM5-K-001')),true);await m5.close();
+ assert.deepEqual(errors,[]);assert.deepEqual(m5Errors,[]);
+ console.log('Browser QA passed: STAW and M5 load, search, equip, uniqueness, totals, faction penalty, face-value SPUDS mode, resources, persistence, rollback, exports, missing routes, art routes, and mobile layout.');
  await browser.close();
 })().catch(e=>{console.error(e);process.exit(1);});

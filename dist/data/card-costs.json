@@ -315,6 +315,27 @@
     "spudsCost": null
   },
   {
+    "id": "AC0001",
+    "name": "Alliance Federation Captain",
+    "type": "captain",
+    "cost": 0,
+    "spudsCost": null
+  },
+  {
+    "id": "AC0009",
+    "name": "Alliance Klingon Captain",
+    "type": "captain",
+    "cost": 0,
+    "spudsCost": null
+  },
+  {
+    "id": "AC0017",
+    "name": "Alliance Romulan Captain",
+    "type": "captain",
+    "cost": 0,
+    "spudsCost": null
+  },
+  {
     "id": "adaptation_tokens",
     "name": "Adaptation Tokens",
     "type": "token",
