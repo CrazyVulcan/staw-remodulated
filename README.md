@@ -8,7 +8,11 @@ Double-click **START.cmd**, then open **http://127.0.0.1:4173**. Node.js 22 or n
 
 Alternatively run `npm start` in this folder. Running the site does not require npm install or an Internet connection. The included card fronts, fonts, icons, and application code are local. TTS itself still downloads its original Steam-hosted assets.
 
-`npm run build` creates a deployable static site in `dist/`. No hosting account or deployment is configured.
+`npm run build` creates a deployable static site in `dist/`.
+
+The home page links to the STAW builder (`staw/`), the working M5 tracker prototype (`m5.html`), and the Klingon V3.2 card reference builder (`m5/`). The reference builder preserves its six ships, 26 ability cards and separate saved lists; TTS export is disabled there because its card IDs are not yet supported by the tracker. Use the M5 tracker prototype for supported opponent exports. Its signed Captain Skill, Threat and program rules remain separate from the STAW equipment rules.
+
+The [current TTS playtest save and predictive AI](tts/staw/README.md) now live in this repository with editable Lua and tests. Run `npm run check:tts` and `npm run test:staw` to verify it; run `npm run build:tts` after editing its sources. Updating the website alone does not update an installed TTS save.
 
 ## Build a fleet
 

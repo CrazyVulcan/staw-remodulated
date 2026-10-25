@@ -78,7 +78,7 @@ const {chromium}=require(process.env.STAW_NODE_MODULES?p.join(process.env.STAW_N
  await m5.locator('[data-add="ship:M5-K-S01"]').click();assert.equal(await m5.locator('#total').textContent(),'4');
  await m5.locator('[data-slot="0"]').click();await m5.locator('#search').fill('M5-K-001');await m5.locator('[data-add="m5:M5-K-001"]').click();assert.equal(await m5.locator('#total').textContent(),'6');
  assert.match(await m5.locator('.fleet-card .card-image').first().getAttribute('style'),/klingon-ships-v3\.2\.png/);
- assert.equal(await m5.evaluate(()=>M5.exportFleet('text').startsWith('M5-K-S01\nM5-K-001')),true);await m5.close();
+ assert.equal(await m5.locator('#export').isDisabled(),true);assert.match(await m5.evaluate(()=>{try{M5.exportFleet('json');return '';}catch(e){return e.message;}}),/reference catalog/);await m5.close();
  assert.deepEqual(errors,[]);assert.deepEqual(m5Errors,[]);
  console.log('Browser QA passed: STAW and M5 load, search, equip, uniqueness, totals, faction penalty, face-value SPUDS mode, resources, persistence, rollback, exports, missing routes, art routes, and mobile layout.');
  await browser.close();

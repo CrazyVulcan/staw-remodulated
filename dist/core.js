@@ -16,6 +16,7 @@
  function walkEntries(card,hidden=false){if(!card)return [];return [{card,hidden},...['resource','captain','admiral','ambassador','construction'].flatMap(k=>walkEntries(card[k],hidden)),...['upgrades','upgradeSlots'].flatMap(k=>(card[k]||[]).flatMap(slot=>walkEntries(slot.occupant,hidden||slot.faceDown===true)))];}
  function walk(card){return walkEntries(card).map(entry=>entry.card);}
  function ttsExport(fleet,routes,mode='text',options={}){
+   if(options.referenceOnly)throw Error('This is a reference catalog. Use M5 tracker fleets for TTS export.');
   if(!fleet.ships.length)throw Error('Add at least one ship to export.');
   const groups=[...fleet.ships.map(card=>walkEntries(card).filter(entry=>!isVirtual(entry.card))),...(fleet.resource?[walkEntries(fleet.resource).filter(entry=>!isVirtual(entry.card))]:[])],all=groups.flat().map(entry=>entry.card),missing=all.filter(c=>!routes[key(c)]);
   if(missing.length)throw Error('These cards have no verified route in the supplied TTS save: '+[...new Set(missing.map(c=>c.name+' ('+c.id+')'))].join(', ')+'. Nothing was exported.');

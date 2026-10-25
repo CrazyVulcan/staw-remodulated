@@ -8,7 +8,8 @@ test('Landing page links to isolated STAW and M5 builders using one shared engin
   assert.ok(fs.existsSync(p.join(root,file)),file);
  }
  assert.match(read('src/app.js'),/data-maneuver/);
- assert.match(html,/href="staw\/"/);assert.match(html,/href="m5\/"/);
+ assert.match(html,/href="staw\/"/);assert.match(html,/href="m5\/"/);assert.match(html,/href="m5.html"/);
+ assert.match(m5,/referenceOnly:true/);assert.match(staw,/trackerHref:'\.\.\/m5.html'/);
  assert.match(staw,/gameId:'staw'/);assert.match(m5,/gameId:'m5'/);
  assert.match(staw,/storagePrefix:'staw-remodulated'/);assert.match(m5,/storagePrefix:'m5-remodulated'/);
  assert.match(m5,/catalogBase:'data\/m5'/);assert.match(m5,/catalogFile:'data\/m5\/data\.json'/);

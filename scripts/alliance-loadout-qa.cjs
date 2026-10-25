@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('fs'),p=require('path');
 const {chromium}=require('playwright');
 (async()=>{
- const out=process.env.STAW_QA_OUTPUT||p.resolve(__dirname,'../../output/alliance-loadouts-2026-10-13');fs.mkdirSync(out,{recursive:true});
+ const out=process.env.STAW_QA_OUTPUT||p.resolve(__dirname,'../test-results/alliance-loadouts');fs.mkdirSync(out,{recursive:true});
  const browser=await chromium.launch({channel:'msedge',headless:true});
  try{
   const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],fixtures=[];

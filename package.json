@@ -15,6 +15,10 @@
     "build": "node scripts/build.cjs",
     "test": "node --test tests/*.test.cjs",
     "test:browser": "node scripts/browser-qa.cjs",
-    "test:tts": "node scripts/tts-parser-qa.cjs"
+    "test:tts": "node scripts/tts-parser-qa.cjs",
+    "build:tts": "node scripts/build-tts-staw.cjs",
+    "check:tts": "node scripts/build-tts-staw.cjs --check",
+    "test:staw": "node scripts/test-tts-staw.cjs",
+    "test:site": "node scripts/site-routes-qa.cjs"
   }
 }

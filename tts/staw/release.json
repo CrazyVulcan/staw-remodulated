@@ -1,0 +1,15 @@
+{
+  "file": "STAW_Remodulated_AI_Anticipation_2026_10_19.json",
+  "sha256": "21c66f533e6fc73a9a3246bd4e9ea8bcf61ee324bd6869462e3a8cd26c8d75c3",
+  "objects": 101,
+  "layoutSHA256": "cbdc6800025560613aac3cbf5d17432dd019ee1b0b68846b2fb3ce0d1feff724",
+  "globalSources": [
+    "src/Global.base.lua",
+    "src/anticipation.lua"
+  ],
+  "objectScripts": {
+    "2a5e01": "src/2a5e01.lua",
+    "5084a4": "src/5084a4.lua"
+  },
+  "nativeTTSValidation": false
+}

@@ -1,4 +1,8 @@
-# M5 tracker prototype
+# Tabletop Simulator sources
+
+The current [STAW playtest release and predictive AI](staw/README.md) includes a loadable save, editable Lua sources and portable regression tests. The M5 tracker prototype described below remains supported and is included in that save.
+
+## M5 tracker prototype
 
 Build fleets at `m5.html` (also linked from the player fleet builder). M5 ship identifiers use `M5S` followed by three digits: `M5S001` is the initial Neg'Var profile. Programs have separate stable identifiers.
 
@@ -31,4 +35,4 @@ npm run build
 node scripts/m5-browser-qa.cjs
 ```
 
-Browser QA currently uses installed Microsoft Edge. Set `STAW_M5_SAVE` to an original Remodulated save path before running tests to enable the actual-save Lua integration test; otherwise that test is skipped. It exercises real fleet parsing/import, program ordering, duplicate prevention, persisted authoritative state, tracker authorization, and repeat-action guards. Ordinary fleet imports remain supported.
+Browser QA currently uses installed Microsoft Edge. The Node suite runs the actual-save Lua integration test against the included STAW release by default. Set `STAW_M5_SAVE` to an original Remodulated save path to test the updater against another compatible save. It exercises real fleet parsing/import, program ordering, duplicate prevention, persisted authoritative state, tracker authorization, and repeat-action guards. Ordinary fleet imports remain supported.
