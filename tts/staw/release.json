@@ -1,15 +1,17 @@
 {
-  "file": "STAW_Remodulated_AI_Anticipation_2026_10_19.json",
-  "sha256": "ae497d24c1480d555bf11804b99f86856a0e78fb888d321cbefd92db5efa41b0",
+  "file": "STAW_Remodulated_Base_Arcs_Echo_2026_10_25.json",
+  "sha256": "8c6a255b7a080cb5a3e567a9f1a41ae346f4bd23766130f8d810975cfc421e36",
   "objects": 101,
-  "layoutSHA256": "cbdc6800025560613aac3cbf5d17432dd019ee1b0b68846b2fb3ce0d1feff724",
+  "layoutSHA256": "38238772316cfe353482789d73eaae6fa3a799ea95c105879dd9b9f44395b818",
   "globalSources": [
     "src/Global.base.lua",
     "src/anticipation.lua"
   ],
   "objectScripts": {
     "2a5e01": "src/2a5e01.lua",
-    "5084a4": "src/5084a4.lua"
+    "5084a4": "src/5084a4.lua",
+    "e94606": "src/cloak-token.lua"
   },
-  "nativeTTSValidation": false
+  "nativeTTSValidation": false,
+  "cloakSource": "src/cloak-token.lua"
 }

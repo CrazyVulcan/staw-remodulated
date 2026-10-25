@@ -1,15 +1,24 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const dir=path.resolve(__dirname,'../tts/staw');
 const hash=value=>crypto.createHash('sha256').update(value).digest('hex');
+function walkObjects(objects,visit){
+  for(const object of objects){visit(object);walkObjects(object.ContainedObjects||[],visit);walkObjects(Object.values(object.States||{}),visit);}
+}
+function layoutOf(objects){const layout=structuredClone(objects);walkObjects(layout,object=>{delete object.LuaScript;});return layout;}
 function assemble(){
   const manifest=JSON.parse(fs.readFileSync(path.join(dir,'release.json'),'utf8'));
   const save=JSON.parse(fs.readFileSync(path.join(dir,manifest.file),'utf8'));
   save.LuaScript=manifest.globalSources.map(file=>fs.readFileSync(path.join(dir,file),'utf8')).join('\n');
-  for(const [guid,file]of Object.entries(manifest.objectScripts)){
-    const object=save.ObjectStates.find(object=>object.GUID===guid);assert(object,'Missing scripted object '+guid);
-    object.LuaScript=fs.readFileSync(path.join(dir,file),'utf8');
+  if(manifest.cloakSource){
+    assert.equal(save.LuaScript.split('__STAW_CLOAK_TOKEN_SOURCE__').length,2,'Missing unique cloak source placeholder.');
+    save.LuaScript=save.LuaScript.replace('__STAW_CLOAK_TOKEN_SOURCE__',()=>fs.readFileSync(path.join(dir,manifest.cloakSource),'utf8'));
   }
-  const layout=structuredClone(save.ObjectStates);for(const object of layout)delete object.LuaScript;
+  for(const [guid,file]of Object.entries(manifest.objectScripts)){
+    const found=[];walkObjects(save.ObjectStates,object=>{if(object.GUID===guid)found.push(object);});
+    assert.equal(found.length,1,'Expected one scripted object '+guid);
+    found[0].LuaScript=fs.readFileSync(path.join(dir,file),'utf8');
+  }
+  const layout=layoutOf(save.ObjectStates);
   assert.equal(layout.length,manifest.objects);
   assert.equal(hash(JSON.stringify(layout)),manifest.layoutSHA256,'Physical table layout changed; review the release manifest before rebuilding.');
   return {manifest,save,content:JSON.stringify(save,null,2)+'\n'};
@@ -26,4 +35,4 @@ if(require.main===module){
     console.log('Built '+manifest.file+'; '+manifest.objects+' physical objects preserved.');
   }
 }
-module.exports={assemble};
+module.exports={assemble,layoutOf};

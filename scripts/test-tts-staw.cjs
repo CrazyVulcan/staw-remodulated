@@ -39,7 +39,11 @@ try{
   execute(L,readTest('mock-tts.lua'),'mock-tts.lua');
   execute(L,save.LuaScript,'packaged Global.lua');
   execute(L,require('../tests/tts-staw/retired-dice.cjs'),'retired dice dashboard tests');
-  for(const name of ['global-tests.lua','core-regression-tests.lua','extra-regression-tests.lua','mission-tests.lua','colors-tests.lua','cards-tests.lua','startup-tests.lua','release-tests.lua','hotfix-tests.lua','book2-tests.lua','based-ships-tests.lua','book3-tests.lua','controller-tests.lua','maneuver-tests.lua','hover-tests.lua','captain-tests.lua','playtest-tests.lua','followup-tests.lua','anticipation-tests.lua'])execute(L,readTest(name),name);
+  if(process.argv.includes('--focus-base')){
+    execute(L,readTest('mission-tests.lua').split('test("Mission definitions')[0],'extended object mocks');
+    execute(L,'onLoad("");_drain(20000)','startup');
+    execute(L,readTest('base-arcs-echo-tests.lua'),'base-arcs-echo-tests.lua');
+  }else for(const name of ['global-tests.lua','core-regression-tests.lua','extra-regression-tests.lua','mission-tests.lua','colors-tests.lua','cards-tests.lua','startup-tests.lua','release-tests.lua','hotfix-tests.lua','book2-tests.lua','based-ships-tests.lua','book3-tests.lua','controller-tests.lua','maneuver-tests.lua','hover-tests.lua','captain-tests.lua','playtest-tests.lua','followup-tests.lua','anticipation-tests.lua','base-arcs-echo-tests.lua'])execute(L,readTest(name),name);
 }catch(error){results.tests.push({name:'Harness execution',pass:false,detail:error.message});}
 lua.lua_close(L);
 const output=path.resolve(__dirname,'../test-results');fs.mkdirSync(output,{recursive:true});
