@@ -47,7 +47,7 @@ test('Alliance flexible slots append after the Talent slots and retain independe
  }
 });
 
-test('Every visible Alliance AP upgrade has an exact TTS route, including AP1014',()=>{
+test('Legacy Alliance AP upgrades retain exact TTS routes, including AP1014',()=>{
  const data=read('public/data/data.json'),routes=read('public/data/tts-routes.json'),catalog=read('vendor/tts-catalog.json');
  const upgrades=data.upgrades.filter(card=>/^AP\d+$/.test(card.id));assert.ok(upgrades.length>=26);
  for(const card of upgrades){

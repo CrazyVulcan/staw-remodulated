@@ -8,6 +8,16 @@ const {chromium}=require('playwright');
   await page.goto(process.env.STAW_QA_URL||'http://127.0.0.1:4173/staw/');await page.waitForFunction(()=>!!window.STAW);
   const options=await page.locator('#set option').allTextContents();assert.equal(options.filter(s=>s==='Alliance').length,1);assert(!options.some(s=>/^Part (I|II|III)$/.test(s)));
   await page.selectOption('#set','alliance');
+  for(const [type,name,id]of [['crew','Commander','C362'],['crew','Engineering Officer','C391'],['tech','Reinforced Shielding','T253']]){
+   await page.selectOption('#type',type);await page.locator('#search').fill(name);
+   assert.equal(await page.locator('[data-add="'+type+':'+id+'"]').count(),1);
+   assert.equal(await page.locator('.catalog-entry [data-add*="AP"]').count(),0,'Duplicate AP row is still visible');
+  }
+  await page.evaluate(()=>STAW.loadText('S274\nAC0001\nAP1005'));
+  const legacy=await page.evaluate(()=>JSON.stringify(STAW.saveObject()));
+  await page.evaluate(saved=>STAW.loadText(saved),legacy);
+  assert.equal(await page.evaluate(()=>STAW.exportFleet('text').includes('\nAP1005\n')),true,'Legacy AP ID was changed');
+  assert.equal(await page.locator('.fleet-card code').filter({hasText:'AP1005'}).count(),1,'Legacy AP card is missing from its fleet');
   for(const set of ['80000','80001','80002','80003']){
    const card=await page.evaluate(set=>STAW.cards.find(c=>(c.set||[]).includes(set)&&c.type==='ship')?.id||STAW.cards.find(c=>(c.set||[]).includes(set))?.id,set);
    assert(card,'Alliance source '+set+' has no cards');await page.selectOption('#type','');await page.locator('#search').fill(card);assert(await page.locator('.catalog-entry').count()>0,'Alliance filter omitted '+set);

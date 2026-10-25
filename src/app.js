@@ -185,7 +185,7 @@ async function init(){
  await new Promise(resolve=>injector.get('cardLoader')(cards,sets,{}, {},resolve));
  cards.forEach(RemodulatedRules.applyCatalogSlots);
  const sourceTypes=new Map(costs.map(c=>[c.id,c.type]));for(const c of cards){c.catalogType=sourceTypes.get(c.id)||c.type;if(c.catalogType!==c.type)aliases[c.type+':'+c.id]=key(c);}
- cards=cards.filter((c,i,arr)=>arr.findIndex(x=>key(x)===key(c))===i);catalogCards=cards.filter(c=>!RemodulatedRules.isInternalHelper(c));byKey=Object.fromEntries(cards.map(c=>[key(c),c]));
+ cards=cards.filter((c,i,arr)=>arr.findIndex(x=>key(x)===key(c))===i);catalogCards=RemodulatedRules.libraryCards(cards);byKey=Object.fromEntries(cards.map(c=>[key(c),c]));
  try{const stored=JSON.parse(localStorage.getItem(costStorageKey)||'null');if(stored)costs=FleetCore.migrateCosts(stored,costs,byKey);}catch{toast('Stored costs could not be read; using the bundled catalog.');}
  applyCosts();engine={$watch(){},$on(){},cards,fleet,searchOptions:{types:{},columns:1}};injector.get('$controller')(injector.get('fleetBuilderDirective')[0].controller,{$scope:engine});
  const originalSaveFleet=engine.saveFleet;engine.saveFleet=value=>FleetCore.withCaptainProgress(value,originalSaveFleet(value));
