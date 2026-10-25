@@ -7,7 +7,8 @@ test('M5 updater refuses unsupported or already patched saves',()=>{
 });
 test('Website export imports through the real Remodulated Lua and tracker',()=>{
   const {lua,lauxlib,lualib,to_luastring,to_jsstring}=require('fengari');
-  const original=JSON.parse(fs.readFileSync(process.env.STAW_M5_SAVE||path.resolve(__dirname,'../tts/staw/STAW_Remodulated_AI_Anticipation_2026_10_19.json'),'utf8'));
+  const release=require('../tts/staw/release.json');
+  const original=JSON.parse(fs.readFileSync(process.env.STAW_M5_SAVE||path.resolve(__dirname,'../tts/staw',release.file),'utf8'));
   const save=original.LuaScript.includes('STA2E.M5 =')?original:update(original);
   assert.deepEqual(save.ObjectStates,original.ObjectStates);assert.equal(save.LuaScriptState,original.LuaScriptState);
   assert(!save.LuaScript.includes('M5 BUILDER'));assert(!save.LuaScript.includes('RUN M5'));

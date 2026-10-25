@@ -1,6 +1,7 @@
 -- Exercise the exact packaged Global under the established TTS API harness.
 local function setup()
     _reset()
+    math.randomseed(20261025) -- Reproduce the same scene on local and CI hosts.
     local board=_object('ae9c49',nil,{0,0.53,0});board.setRotation({0,90,0})
     board.getScale=function()return {x=1.89,y=1.87,z=1.89}end
     local bag=_object('df60bd',nil,{60,1,60})
@@ -18,6 +19,13 @@ local function clearLanes(s)
     for id in pairs(s.shipRecords)do
         local ship=STA2E.ships[id];local base=ship and ship.refs and _objects[ship.refs.base]
         if base then base.setPosition({0,1.3,-2})end
+    end
+    -- These cases verify every wave's profiles/counts, with arrival lanes clear.
+    -- Random asteroid placement may legitimately obstruct a fixed bearing; move
+    -- it aside as a player would before Retry. Dedicated obstruction tests keep
+    -- exercising the production blocking and retry behavior.
+    for _,row in ipairs((s.missionObjects and s.missionObjects.objects) or {}) do
+        if row.kind=='asteroid' and _objects[row.guid] then _objects[row.guid].setPosition({100,1.3,100})end
     end
 end
 local expected={
