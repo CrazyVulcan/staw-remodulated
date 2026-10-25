@@ -7862,7 +7862,9 @@ function F.request(s)
  commit(s)
  if model.setInvisibleTo then model.setInvisibleTo(colors) end
  if model.setLock then model.setLock(true) end
- model.setPosition({p.x,-1000,p.z})
+ -- Keep the hidden locked miniature above the table, away from the settling
+ -- base and the below-table cleanup zone.
+ model.setPosition({p.x,p.y+20,p.z})
  local function poll()
   if F.jobs[s.instanceId]~=job or F.epoch~=job.epoch then return end
   local b,m=obj(job.base),obj(job.model)

@@ -9,7 +9,7 @@ test("Model follow waits for the base's final settled pose and never moves the b
  _reset();local s,b,m=ship("settle");local writes=0
  b.setPosition=function()writes=writes+1 end
  b.held_by_color="Blue";b.resting=false
- onObjectPickUp("Blue",b);assert(m.getPosition().y==-1000 and s.state.modelFollowPending)
+ onObjectPickUp("Blue",b);assert(m.getPosition().y>b.getPosition().y+10 and m.locked and s.state.modelFollowPending)
  Wait.frames(function()b.held_by_color=nil;b._position={x=4,y=4,z=5};onObjectDrop("Blue",b)end,2)
  Wait.frames(function()b._position={x=6,y=2,z=8}end,7)
  Wait.frames(function()b._position={x=7,y=1.37,z=9};b._rotation={x=0,y=43,z=0};b.resting=true end,15)
