@@ -1,6 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const M5=require('../src/m5-core.js'),catalog=require('../public/data/m5-catalog.json');
 const fleet=()=>({schemaVersion:2,source:{kind:'remodulated-m5',m5Version:1},fleetId:'m5-test',threatLimit:30,ships:[{shipCardId:'M5S001',cards:[{cardId:'focused_barrage'},{cardId:'hunters_algorithm'}]}],resources:[]});
+
+test('Reference catalog IDs cannot masquerade as supported tracker exports',()=>{
+ const core=require('../src/core.js');
+ assert.throws(()=>core.ttsExport({ships:[{id:'M5-K-S01'}]}, {},'json',{referenceOnly:true}),/reference catalog/);
+ const f=fleet();f.ships[0].shipCardId='M5-K-S01';assert.throws(()=>M5.validate(f,catalog),/Unknown M5 ship/);
+});
 test('M5 IDs, signed CS, Threat and slots',()=>{const t=M5.validate(fleet(),catalog);assert.equal(t.ships[0].cs,5);assert.equal(t.threat,10);assert.equal(t.ships[0].slots,3);assert.equal(t.ships[0].capacity,4);assert.match(catalog.ships[0].id,/^M5S\d{3}$/);});
 test('M5 round-trip preserves repeated hulls and program order',()=>{const f=fleet();f.ships.push(structuredClone(f.ships[0]));assert.deepEqual(M5.parse(M5.serialize(f,catalog),catalog),f);assert.equal(M5.validate(f,catalog).threat,20);});
 test('M5 rejects unknown IDs, duplicate programs, bad versions and oversized fleets',()=>{for(const edit of [f=>f.ships[0].shipCardId='S193',f=>f.ships[0].cards.push({cardId:'unknown'}),f=>f.ships[0].cards.push({cardId:'focused_barrage'}),f=>f.source.m5Version=2,f=>f.ships.push(f.ships[0],f.ships[0],f.ships[0])]){const f=fleet();edit(f);assert.throws(()=>M5.validate(f,catalog));}});

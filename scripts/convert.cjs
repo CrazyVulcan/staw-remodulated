@@ -5,8 +5,10 @@ const write=(f,v)=>{fs.mkdirSync(p.dirname(p.join(root,f)),{recursive:true});fs.
 const groups=['ships','captains','admirals','ambassadors','upgrades','starship_construction','resources','others'];
 const data={sets:require(p.join(source,'sets.js')),shipClasses:require(p.join(source,'ship_classes.js'))};
 const tts=read('vendor/tts-catalog.json'),ttsBy=new Map(tts.cards.map(c=>[c.id,c]));
+const localCards=read('vendor/remodulated-cards.json');
 const cards=[],aliases={},merges=[],conflicts=[],suppressedAlliance=[],keys=new Map();
-for(const group of groups){data[group]=[];for(const raw of require(p.join(source,group+'.js'))){
+for(const group of groups){data[group]=[];for(const sourceCard of require(p.join(source,group+'.js'))){
+  const raw={...sourceCard,...localCards[sourceCard.type+':'+sourceCard.id]};
   if(raw.type==='copy'){data[group].push(raw);continue;}
   const ids=(Array.isArray(raw.id)?raw.id:[raw.id]).map(String);
   // Alliance-only duplicates are useful in the Alliance app, but cannot be
@@ -42,6 +44,7 @@ for(const c of cards){
   if(index>=width*height)throw new Error('Sheet index outside image: '+key);
   routes[key]={id:t.id,type:t.type,name:t.name,face,back,width,height,index,ttsCardId:t.sheet?.ttsCardId||null,assetSheet:t.assetSheet||null,...(t.objectKind?{objectKind:t.objectKind}:{}),...(t.objectScale?{objectScale:t.objectScale}:{})};
   const old=previousRoutes[key];if(old?.localImage&&old.face===face&&old.width===width&&old.height===height&&old.index===index){routes[key].localImage=old.localImage;routes[key].aspect=old.aspect;}
+  if(t.interactiveCaptain){const preview='cards/captain/captain-'+t.id+'.webp';if(!fs.existsSync(p.join(root,'public',preview)))throw Error('Missing interactive captain preview: '+t.id);routes[key].localImage=preview;routes[key].aspect=t.previewAspect;}
 }
 // Name disagreements are never silently exported. Keep evidence for human review.
 const costsPath=p.join(root,'public/data/card-costs.json');

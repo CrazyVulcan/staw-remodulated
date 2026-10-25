@@ -8,7 +8,11 @@ Double-click **START.cmd**, then open **http://127.0.0.1:4173**. Node.js 22 or n
 
 Alternatively run `npm start` in this folder. Running the site does not require npm install or an Internet connection. The included card fronts, fonts, icons, and application code are local. TTS itself still downloads its original Steam-hosted assets.
 
-`npm run build` creates a deployable static site in `dist/`. No hosting account or deployment is configured.
+`npm run build` creates a deployable static site in `dist/`.
+
+The home page links to the STAW builder (`staw/`), the working M5 tracker prototype (`m5.html`), and the Klingon V3.2 card reference builder (`m5/`). The reference builder preserves its six ships, 26 ability cards and separate saved lists; TTS export is disabled there because its card IDs are not yet supported by the tracker. Use the M5 tracker prototype for supported opponent exports. Its signed Captain Skill, Threat and program rules remain separate from the STAW equipment rules.
+
+The [current TTS playtest save and predictive AI](tts/staw/README.md) now live in this repository with editable Lua and tests. Run `npm run check:tts` and `npm run test:staw` to verify it; run `npm run build:tts` after editing its sources. Updating the website alone does not update an installed TTS save.
 
 ## Build a fleet
 
@@ -19,7 +23,15 @@ Alternatively run `npm start` in this folder. Running the site does not require 
 5. Save the fleet as JSON. Fleets auto-save in this browser; downloaded fleets also include their cost profile. Import accepts Remodulated JSON, original Utopia URL hashes/JSON, TTS schema-2 JSON, or one-ID-per-line lists. Unknown IDs stop import instead of being dropped.
 6. Export to TTS, then paste the result into **Fleet Setup** in the supplied Remodulated save. Both familiar Utopia ID text and schema-2 JSON are supported.
 
+The **Alliance (Parts I–III)** expansion filter combines all three Alliance parts and the Alliance builder cards, including the interactive captains and AP upgrades.
+
 ## Bonus slots and flexible cards
+
+The captain library includes **Alliance Federation Captain (AC0001)**, **Alliance Klingon Captain (AC0009)**, and **Alliance Romulan Captain (AC0017)**. Each adds three Talent slots and two flexible Tech/Weapon/Crew slots to the ship's printed slots. All five captain slots are available in the builder; the player chooses which cards to equip for their XP unlocks. Equip one in the captain slot and export normally. Use the accompanying updated TTS save: it imports the supplied interactive XP tile, including its name input, point tracks, and expansion selectors. Name and XP editing stay in TTS. The initial captain is skill 2; the printed skill track reaches skill 9 at 14 XP. Its XP total is separate from the builder's fleet SP total.
+
+All 26 visible Alliance AP upgrades have mapped TTS card assets, including **Reinforced Shielding (AP1014)**. Cards equipped in the captain's generated slots are included in saved fleets, totals, and both TTS export formats. `node scripts/alliance-loadout-qa.cjs` checks full loadouts, every flexible-slot type combination, old saved fleets, and AP1014 against the running local builder.
+
+The TTS tracker follows captain name/skill edits and ship-card name changes. The imported captain initially uses the importing player's display name. Renaming the ship card updates the ship part of the tracker row within about half a second; captain identity remains separate. Both XP and the ship association survive saving and loading TTS.
 
 The builder runs the original Utopia rules engine locally, including card-specific slot additions, flexible `?` upgrades, faction penalties, free-card effects, uniqueness checks, and fleet cost interceptors. Selecting a slot filters the library using all compatible types and any restrictions attached to that slot.
 
@@ -47,12 +59,12 @@ The TTS importer reads its own card values. Exporting a SPUDS list does not rewr
 
 ## Catalog and ID audit
 
-- 2,296 canonical Utopia card/reference records converted, with globally unique scalar IDs.
-- 77 Alliance-only records without a matching card in the supplied TTS catalog are suppressed. Alliance cards with a verified TTS route remain available.
+- 2,299 canonical Utopia card/reference records converted, with globally unique scalar IDs.
+- 74 Alliance-only records without a matching card in the supplied TTS catalog are suppressed. Alliance cards with a verified TTS route remain available.
 - Seven equivalent duplicate records merged, combining their expansion membership. Different editions and mechanically different cards retain their separate IDs even when their names match.
 - Array IDs and alternate-side IDs have explicit aliases. The accidentally duplicated Borg Tractor Beam reference ID is separated from the Specialization reference.
 - T053 and T057 keep stable tech catalog identities while retaining Utopia's multi-slot equipment behavior.
-- 2,194 verified canonical TTS routes, each with a local WebP front extracted from the exact source image and cell. All match the supplied TTS catalog's name/type.
+- 2,197 verified canonical TTS routes, each with a local WebP front extracted from the exact source image and cell. All match the supplied TTS catalog's name/type.
 - The catalog includes verified TTS objects for all eight Flagship cards, all eight Fleet Captain cards, and 36 single-card Resources recovered from the supplied legacy save. The generic Flagship/Fleet Captain selector records are intentionally virtual. Four composite Resources—Attack Fighters (two versions), Officer Cards, and Sick Bay—remain unmapped until their multi-object contents can be recovered accurately.
 - **102 records have no verified route in the supplied saves.** They are still in the catalog and cost file; uncheck TTS-ready cards to see them. Unmapped cards render from converted rules data with STAW fonts. Export blocks any unmapped real card and identifies it by name/ID. No substitute card or guessed image is exported.
 
@@ -69,7 +81,7 @@ See `public/data/id-audit.json` for every merge, alias, correction, and missing 
 | `public/data/aliases.json` | Old identifiers → canonical identifiers |
 | `public/data/hidden-slot-audit.json` | Cards whose generated slots hold face-down/hidden cards |
 | `public/data/maneuver-cards.json` | Ship classes → supplied maneuver-card scans and structured grids |
-| `public/cards/` | 2,194 extracted local card fronts |
+| `public/cards/` | 2,197 extracted local card fronts |
 | `public/maneuvers/` | Local maneuver-card fronts imported from the supplied TTS saved object |
 | `src/` | New interface and export/import code |
 | `vendor/utopia/` | Preserved Utopia source, including special card rules |

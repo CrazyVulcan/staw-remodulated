@@ -3,7 +3,7 @@ const root=p.resolve(__dirname,'..'),read=f=>JSON.parse(fs.readFileSync(p.join(r
 const data=read('public/data/data.json'),costs=read('public/data/card-costs.json'),routes=read('public/data/tts-routes.json'),aliases=read('public/data/aliases.json'),audit=read('public/data/id-audit.json'),maneuverCards=read('public/data/maneuver-cards.json'),rules=require('../src/rules.js');
 const cards=Object.entries(data).filter(([k])=>!['sets','shipClasses'].includes(k)).flatMap(([,v])=>v).filter(c=>c.id&&c.type!=='copy'),by=Object.fromEntries(cards.map(c=>[core.key(c),c]));
 test('Every converted record has a scalar, globally unique ID and one cost row',()=>{
- assert.equal(cards.length,2296);assert.equal(new Set(cards.map(c=>c.id)).size,cards.length);
+ assert.equal(cards.length,2299);assert.equal(new Set(cards.map(c=>c.id)).size,cards.length);
  assert.equal(new Set(cards.map(core.key)).size,cards.length);assert.equal(costs.length,cards.length);
  core.validateCosts(costs,by);assert.equal(audit.mismatches.length,0);
 });
@@ -13,14 +13,14 @@ test('Array IDs and duplicates have unambiguous aliases',()=>{
  assert.equal(by['token:rule_specialzation'].name,'Specialization Cards (SCS)');
 });
 test('Alliance-only cards without a loadable TTS route are suppressed',()=>{
- assert.equal(audit.suppressedAlliance.length,77);
+ assert.equal(audit.suppressedAlliance.length,74);
  assert.equal(cards.filter(c=>c.alliance&&!routes[core.key(c)]).length,0);
- assert.equal(by['captain:AC0001'],undefined);
+ for(const id of ['AC0001','AC0009','AC0017'])assert.ok(by['captain:'+id]?.interactiveCaptain);
  assert.ok(by['crew:AP1001']);assert.ok(routes['crew:AP1001']);
 });
 test('Every TTS route matches its original catalog identity and a local image',()=>{
  const catalog=read('vendor/tts-catalog.json');const original=new Map(catalog.cards.map(c=>[c.id,c]));
- assert.equal(Object.keys(routes).length,2194);
+ assert.equal(Object.keys(routes).length,2197);
  for(const [k,r]of Object.entries(routes)){assert.equal(r.id,by[k].id);assert.equal(r.type,by[k].type);assert.equal(r.name,original.get(r.id).name);assert.ok(r.index>=0&&r.index<r.width*r.height);assert.match(r.localImage,new RegExp('^cards/'+r.type+'/'));assert.ok(fs.existsSync(p.join(root,'public',r.localImage)),k);}
  const folders=fs.readdirSync(p.join(root,'public/cards'),{withFileTypes:true});
  assert.ok(folders.every(entry=>entry.isDirectory()));
@@ -146,7 +146,7 @@ test('Fleet imports use all six v7 staging hands and place shields beside ship c
  assert.match(lua,/local function importedShipName\(card\)/);
  assert.match(lua,/if name:match\(" Starship\$"\) and className~="" then return className end/);
  assert.match(lua,/name=importedShipName\(root\)/);
- assert.match(lua,/STA2E\.ships\[s\.instanceId\]=s;commit\(s\);spawnFleetShields\(s\);deploy\(s\);refresh\(s\)/);
+ assert.match(lua,/STA2E\.ships\[s\.instanceId\]=s;STA2E\.AllianceCaptain\.syncShipName\(s\);STA2E\.AllianceCaptain\.syncCaptain\(s\);commit\(s\);spawnFleetShields\(s\);deploy\(s\);refresh\(s\)/);
  assert.match(lua,/Fleet cards spawned; ships, dials, and maneuver references are deploying\./);
  assert.match(lua,/local target=playerSideTransform\(s\.owner,object\.getPosition\(\),\{forward=4\.8,up=0\.25\}\)/);
  assert.match(lua,/s\.spawnRotation=target\.facing or target\.rotation\[2\]/);

@@ -1,13 +1,14 @@
-const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {update}=require('../scripts/update-tts-m5.cjs');
 const M5=require('../src/m5-core.js'),catalog=require('../public/data/m5-catalog.json');
 test('M5 updater refuses unsupported or already patched saves',()=>{
   assert.throws(()=>update({LuaScript:'',SaveName:'empty'}),/Unsupported/);
   assert.throws(()=>update({LuaScript:'STA2E.M5 = {}',SaveName:'already'}),/earlier M5/);
 });
-test('Website export imports through the real Remodulated Lua and tracker', {skip:!process.env.STAW_M5_SAVE},()=>{
+test('Website export imports through the real Remodulated Lua and tracker',()=>{
   const {lua,lauxlib,lualib,to_luastring,to_jsstring}=require('fengari');
-  const original=JSON.parse(fs.readFileSync(process.env.STAW_M5_SAVE,'utf8')),save=update(original);
+  const original=JSON.parse(fs.readFileSync(process.env.STAW_M5_SAVE||path.resolve(__dirname,'../tts/staw/STAW_Remodulated_AI_Anticipation_2026_10_19.json'),'utf8'));
+  const save=original.LuaScript.includes('STA2E.M5 =')?original:update(original);
   assert.deepEqual(save.ObjectStates,original.ObjectStates);assert.equal(save.LuaScriptState,original.LuaScriptState);
   assert(!save.LuaScript.includes('M5 BUILDER'));assert(!save.LuaScript.includes('RUN M5'));
   const L=lauxlib.luaL_newstate();lualib.luaL_openlibs(L);
@@ -34,6 +35,7 @@ STA2E.game={phase='setup',round=0,nextId=100,fleets={}};STA2E.ships={};STA2E.rea
 local objects,callbacks={},{}
 getAllObjects=function()return{}end;getObjectFromGUID=function(id)return objects[id]end
 UI={setXml=function()end};Wait={frames=function()end,time=function()end}
+Player={Red={host=false,steam_name='Red'},Blue={host=false,steam_name='Blue'}}
 broadcastToColor=function()end;broadcastToAll=function()end
 hud=function()end;render=function()end;sync=function()end
 STA2E_Reconcile()
@@ -51,7 +53,7 @@ spawnFleetShields=function()end;deploy=function()end
 local serial=0
 spawnObjectData=function(params)
  serial=serial+1;local guid='test-'..serial
- local o={getGUID=function()return guid end,getPosition=function()return{x=params.position[1],y=params.position[2],z=params.position[3]}end}
+ local o={getGUID=function()return guid end,getName=function()return params.data.Nickname or '' end,getPosition=function()return{x=params.position[1],y=params.position[2],z=params.position[3]}end}
  o.call=function(name,value)o.memory=value end;o.destruct=function()objects[guid]=nil end
  objects[guid]=o;table.insert(callbacks,function()params.callback_function(o)end);return o
 end

@@ -2573,7 +2573,8 @@ module.factory( "cardLoader", [ "$http", "$filter", "cardRules", "$factions", fu
 
 		}
 
-		var dataPath = typeof window !== "undefined" && typeof window.remodulatedAssetPath === "function" ? window.remodulatedAssetPath("data/data.json") : "data/data.json";
+		var catalogFile = typeof window !== "undefined" && window.RemodulatedConfig && window.RemodulatedConfig.catalogFile ? window.RemodulatedConfig.catalogFile : "data/data.json";
+		var dataPath = typeof window !== "undefined" && typeof window.remodulatedAssetPath === "function" ? window.remodulatedAssetPath(catalogFile) : catalogFile;
 		$http.get( dataPath ).success( function(data) {
 
 			var copies = [];

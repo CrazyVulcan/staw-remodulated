@@ -1,7 +1,7 @@
 {
   "sourceCommit": "478c9779ec901d2bae2a60d1aec625dcace0f148",
-  "cards": 2296,
-  "ttsRoutes": 2194,
+  "cards": 2299,
+  "ttsRoutes": 2197,
   "merges": [
     {
       "key": "ship:S199",
@@ -656,12 +656,6 @@
   ],
   "suppressedAlliance": [
     {
-      "id": "AC0001",
-      "type": "captain",
-      "name": "Player Captain",
-      "reason": "Alliance-only record has no card in the supplied TTS catalog"
-    },
-    {
       "id": "AC0002",
       "type": "captain",
       "name": "Player Captain",
@@ -704,12 +698,6 @@
       "reason": "Alliance-only record has no card in the supplied TTS catalog"
     },
     {
-      "id": "AC0009",
-      "type": "captain",
-      "name": "Player Captain",
-      "reason": "Alliance-only record has no card in the supplied TTS catalog"
-    },
-    {
       "id": "AC0010",
       "type": "captain",
       "name": "Player Captain",
@@ -747,12 +735,6 @@
     },
     {
       "id": "AC0016",
-      "type": "captain",
-      "name": "Player Captain",
-      "reason": "Alliance-only record has no card in the supplied TTS catalog"
-    },
-    {
-      "id": "AC0017",
       "type": "captain",
       "name": "Player Captain",
       "reason": "Alliance-only record has no card in the supplied TTS catalog"
